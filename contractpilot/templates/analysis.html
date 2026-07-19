@@ -1,126 +1,323 @@
 {% extends "base.html" %}
-{% block title %}Analysis Results — ContractPilot{% endblock %}
+
+{% block title %}Analysis | ContractPilot{% endblock %}
+
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+
 {% block content %}
-<div class="analysis-page">
-    <div class="analysis-header">
-        <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+<!-- Sidebar Navigation -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <a href="/">
+            <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>ContractPilot</span>
+        </a>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/dashboard" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            Dashboard
+        </a>
+        <a href="/upload" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Upload
+        </a>
+        <a href="/analysis" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            Analysis
+        </a>
+        <a href="/pricing" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            Pricing
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <a href="#" id="navLogout" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Logout
+        </a>
+    </div>
+</aside>
+
+<!-- Main Content -->
+<main class="dashboard-main">
+    <header class="dashboard-header">
+        <div>
+            <h1>Contract Analysis</h1>
+            <p class="text-muted">AI-powered risk assessment and redlined suggestions</p>
+        </div>
+        <a href="/upload" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            New Analysis
+        </a>
+    </header>
+
+    <!-- Loading State -->
+    <div id="analysis-loading" class="analysis-loading">
+        <div class="spinner"></div>
+        <p style="font-size: 1.1rem; font-weight: 500; color: var(--slate-200, #e2e8f0);">Analyzing contract with Gemini 2.5 Pro...</p>
+        <span class="text-muted">This usually takes 30&ndash;60 seconds</span>
+    </div>
+
+    <!-- Results Container -->
+    <div id="analysis-results" class="analysis-results" style="display: none;">
+
+        <!-- Risk Score + Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card" style="text-align: center;">
+                <div class="stat-header" style="justify-content: center;">
+                    <span class="stat-label">Risk Score</span>
+                    <span id="risk-badge" class="risk-badge">--</span>
+                </div>
+                <div class="risk-ring-container">
+                    <svg class="risk-ring" viewBox="0 0 120 120">
+                        <circle class="risk-ring-bg" cx="60" cy="60" r="54"/>
+                        <circle id="risk-ring-progress" class="risk-ring-progress" cx="60" cy="60" r="54"/>
+                    </svg>
+                    <div class="risk-score" id="risk-score">--</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Clauses Analyzed</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                </div>
+                <div class="stat-value" id="clause-count">--</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Critical Risks</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-danger">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <div class="stat-value text-danger" id="critical-count">--</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">High Risks</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warning">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <div class="stat-value text-warning" id="high-count">--</div>
+            </div>
+        </div>
+
+        <!-- Flagged Clauses -->
+        <div class="contracts-section">
+            <div class="contracts-header">
+                <h2>Flagged Clauses</h2>
+                <span id="flagged-count" class="text-muted">0 issues found</span>
+            </div>
+            <div id="clauses-list" class="contracts-list">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
         <div class="analysis-actions">
-            <button id="deleteBtn" class="btn-danger-outline">Delete</button>
+            <a href="/upload" class="btn btn-primary">Analyze Another Contract</a>
+            <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
         </div>
     </div>
 
-    <div id="analysisContent">
-        <div class="loading">Loading analysis...</div>
+    <!-- Error State -->
+    <div id="analysis-error" style="display: none; text-align: center; padding: 4rem 2rem;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="margin-bottom: 1rem;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+        <p style="color: #ef4444; font-weight: 500; margin-bottom: 0.5rem;">Analysis Failed</p>
+        <p class="text-muted" id="error-message">Something went wrong.</p>
+        <a href="/upload" class="btn btn-primary" style="margin-top: 1rem;">Try Again</a>
     </div>
-</div>
+</main>
 {% endblock %}
 
-{% block scripts %}
+{% block extra_js %}
 <script>
-const contractId = {{ contract_id }};
-
-async function loadAnalysis() {
+document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
-    if (!token) { window.location.href = '/login'; return; }
+    if (!token) {
+        window.location.href = '/login';
+        return;
+    }
 
+    // Logout handler
+    const navLogout = document.getElementById('navLogout');
+    if (navLogout) {
+        navLogout.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            window.location.href = '/';
+        });
+    }
+
+    // Get contract ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const contractId = urlParams.get('id');
+
+    if (contractId) {
+        fetchAnalysis(contractId, token);
+    } else {
+        showError('No contract ID provided. Upload a contract to analyze it.');
+    }
+});
+
+async function fetchAnalysis(contractId, token) {
     try {
-        const res = await fetch(`/api/contracts/${contractId}`, {
+        const response = await fetch(`/api/contracts/${contractId}/analysis`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (!res.ok) throw new Error('Not found');
-        const contract = await res.json();
 
-        const container = document.getElementById('analysisContent');
-
-        if (contract.status === 'analyzing') {
-            container.innerHTML = `
-                <div class="analyzing-state">
-                    <div class="spinner-large"></div>
-                    <h2>Analyzing your contract...</h2>
-                    <p>This usually takes 30-60 seconds. Gemini 2.5 Pro is reviewing every clause.</p>
-                </div>
-            `;
-            setTimeout(loadAnalysis, 3000);
-            return;
+        if (!response.ok) {
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+                return;
+            }
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || `Analysis failed (${response.status})`);
         }
 
-        const riskClass = contract.risk_score >= 70 ? 'critical' : contract.risk_score >= 50 ? 'high' : contract.risk_score >= 30 ? 'medium' : 'low';
-
-        container.innerHTML = `
-            <div class="analysis-overview">
-                <h1>${escapeHtml(contract.title)}</h1>
-                <div class="risk-dashboard">
-                    <div class="risk-score-card ${riskClass}">
-                        <span class="risk-number">${contract.risk_score}</span>
-                        <span class="risk-label">Risk Score / 100</span>
-                    </div>
-                    <div class="risk-summary">
-                        <h3>Executive Summary</h3>
-                        <p>${escapeHtml(contract.clauses[0]?.explanation || 'Analysis complete.')}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="clauses-section">
-                <h2>Flagged Clauses (${contract.clauses.length})</h2>
-                ${contract.clauses.map(clause => `
-                    <div class="clause-card ${clause.risk_level}">
-                        <div class="clause-header">
-                            <span class="clause-type-badge">${escapeHtml(clause.clause_type)}</span>
-                            <span class="risk-badge ${clause.risk_level}">${clause.risk_level.toUpperCase()}</span>
-                        </div>
-                        <div class="clause-body">
-                            <div class="clause-section">
-                                <label>Original Language</label>
-                                <div class="original-text">${escapeHtml(clause.original_text)}</div>
-                            </div>
-                            <div class="clause-section">
-                                <label>Risk Analysis</label>
-                                <p>${escapeHtml(clause.explanation)}</p>
-                            </div>
-                            ${clause.suggested_revision ? `
-                            <div class="clause-section suggestion">
-                                <label>Suggested Revision</label>
-                                <div class="suggested-text">${escapeHtml(clause.suggested_revision)}</div>
-                                <button class="btn-small btn-copy" onclick="copyText(this, '${escapeHtml(clause.suggested_revision).replace(/'/g, "\'")}')">Copy</button>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-
+        const data = await response.json();
+        renderAnalysis(data);
     } catch (err) {
-        document.getElementById('analysisContent').innerHTML = `
-            <div class="alert alert-error">Could not load analysis. <a href="/dashboard">Go to dashboard</a></div>
-        `;
+        showError(err.message);
     }
 }
 
-document.getElementById('deleteBtn').addEventListener('click', async () => {
-    if (!confirm('Delete this contract analysis?')) return;
-    const token = localStorage.getItem('token');
-    await fetch(`/api/contracts/${contractId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    window.location.href = '/dashboard';
-});
+function renderAnalysis(data) {
+    document.getElementById('analysis-loading').style.display = 'none';
+    document.getElementById('analysis-results').style.display = 'block';
+
+    // Risk score
+    const score = data.risk_score || 0;
+    document.getElementById('risk-score').textContent = score;
+
+    const ring = document.getElementById('risk-ring-progress');
+    const circumference = 2 * Math.PI * 54; // ~339.292
+    const offset = circumference - (score / 100) * circumference;
+
+    // Trigger animation after a brief delay
+    setTimeout(() => {
+        ring.style.strokeDashoffset = offset;
+    }, 100);
+
+    // Color + badge based on score
+    let color = '#22c55e'; // green
+    let badge = 'LOW';
+    if (score > 70) { color = '#ef4444'; badge = 'CRITICAL'; }
+    else if (score > 40) { color = '#f59e0b'; badge = 'HIGH'; }
+    else if (score > 20) { color = '#3b82f6'; badge = 'MEDIUM'; }
+
+    ring.style.stroke = color;
+    const badgeEl = document.getElementById('risk-badge');
+    badgeEl.textContent = badge;
+    badgeEl.style.background = color + '20';
+    badgeEl.style.color = color;
+
+    // Counts
+    const clauses = data.clauses || [];
+    document.getElementById('clause-count').textContent = clauses.length;
+    document.getElementById('critical-count').textContent = 
+        clauses.filter(c => c.severity === 'CRITICAL').length;
+    document.getElementById('high-count').textContent = 
+        clauses.filter(c => c.severity === 'HIGH').length;
+    document.getElementById('flagged-count').textContent = 
+        `${clauses.length} issue${clauses.length !== 1 ? 's' : ''} found`;
+
+    // Render clauses
+    const list = document.getElementById('clauses-list');
+
+    if (clauses.length === 0) {
+        list.innerHTML = `
+            <div class="contract-row empty-state">
+                <p class="text-muted">No risks detected. This contract looks clean!</p>
+            </div>`;
+        return;
+    }
+
+    list.innerHTML = clauses.map((clause, idx) => `
+        <div class="contract-row" style="position: relative;">
+            <span class="severity-badge severity-${(clause.severity || 'LOW').toLowerCase()}">${clause.severity || 'LOW'}</span>
+            <div class="contract-info" style="padding-right: 80px;">
+                <h4>${escapeHtml(clause.title || 'Unnamed Clause')}</h4>
+                <p class="text-muted">${escapeHtml(clause.explanation || 'No explanation provided.')}</p>
+            </div>
+            <div class="contract-actions">
+                <button class="btn btn-sm btn-outline" onclick="toggleSuggestion(${idx})">View Suggestion</button>
+            </div>
+            <div id="suggestion-${idx}" class="suggestion-panel" style="display: none;">
+                <p><strong>Original:</strong></p>
+                <p style="font-style: italic; color: var(--slate-400);">"${escapeHtml(clause.original_text || 'N/A')}"</p>
+                <hr style="border: none; border-top: 1px solid var(--slate-700); margin: 1rem 0;">
+                <p><strong>Suggested Revision:</strong></p>
+                <p style="color: #22c55e; font-weight: 500;">"${escapeHtml(clause.suggested_text || 'No suggestion available.')}"</p>
+            </div>
+        </div>
+    `).join('');
+}
+
+function toggleSuggestion(idx) {
+    const panel = document.getElementById(`suggestion-${idx}`);
+    const btn = panel.previousElementSibling.querySelector('button');
+    const isHidden = panel.style.display === 'none';
+    panel.style.display = isHidden ? 'block' : 'none';
+    btn.textContent = isHidden ? 'Hide Suggestion' : 'View Suggestion';
+}
+
+function showError(message) {
+    document.getElementById('analysis-loading').style.display = 'none';
+    document.getElementById('analysis-results').style.display = 'none';
+    const errDiv = document.getElementById('analysis-error');
+    errDiv.style.display = 'block';
+    document.getElementById('error-message').textContent = message;
+}
 
 function escapeHtml(text) {
-    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
-
-function copyText(btn, text) {
-    navigator.clipboard.writeText(text);
-    btn.textContent = 'Copied!';
-    setTimeout(() => btn.textContent = 'Copy', 2000);
-}
-
-loadAnalysis();
 </script>
 {% endblock %}
