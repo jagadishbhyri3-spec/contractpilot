@@ -10,7 +10,7 @@ import stripe
 
 from app.database import SessionLocal, engine, Base
 from app.models import User, Contract, Clause
-from app.schemas import UserCreate, UserLogin, ContractCreate, AnalysisResponse
+from app.schemas import UserCreate, UserLogin
 from app.auth import create_access_token, verify_password, get_password_hash, get_current_user
 from app.ai_service import analyze_contract
 from app.dependencies import require_pro
