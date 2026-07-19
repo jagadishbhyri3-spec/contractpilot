@@ -83,7 +83,7 @@
     <div id="analysis-loading" class="analysis-loading">
         <div class="spinner"></div>
         <p style="font-size: 1.1rem; font-weight: 500; color: var(--slate-200, #e2e8f0);">Analyzing contract with Gemini 2.5 Pro...</p>
-        <span class="text-muted">This usually takes 30&ndash;60 seconds</span>
+        <span class="text-muted">This usually takes 30-60 seconds</span>
     </div>
 
     <!-- Results Container -->
@@ -235,16 +235,14 @@ function renderAnalysis(data) {
     document.getElementById('risk-score').textContent = score;
 
     const ring = document.getElementById('risk-ring-progress');
-    const circumference = 2 * Math.PI * 54; // ~339.292
+    const circumference = 2 * Math.PI * 54;
     const offset = circumference - (score / 100) * circumference;
 
-    // Trigger animation after a brief delay
     setTimeout(() => {
         ring.style.strokeDashoffset = offset;
     }, 100);
 
-    // Color + badge based on score
-    let color = '#22c55e'; // green
+    let color = '#22c55e';
     let badge = 'LOW';
     if (score > 70) { color = '#ef4444'; badge = 'CRITICAL'; }
     else if (score > 40) { color = '#f59e0b'; badge = 'HIGH'; }
@@ -256,7 +254,6 @@ function renderAnalysis(data) {
     badgeEl.style.background = color + '20';
     badgeEl.style.color = color;
 
-    // Counts
     const clauses = data.clauses || [];
     document.getElementById('clause-count').textContent = clauses.length;
     document.getElementById('critical-count').textContent = 
@@ -266,7 +263,6 @@ function renderAnalysis(data) {
     document.getElementById('flagged-count').textContent = 
         `${clauses.length} issue${clauses.length !== 1 ? 's' : ''} found`;
 
-    // Render clauses
     const list = document.getElementById('clauses-list');
 
     if (clauses.length === 0) {
