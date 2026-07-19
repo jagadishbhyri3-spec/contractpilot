@@ -27,4 +27,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navUpload)   navUpload.style.display = 'none';
         if (navLogout)   navLogout.style.display = 'none';
     }
+
+    // ═══════════════════════════════════════════════════════════════
+    // FIX: Remove target="_blank" from all internal links
+    // This prevents links from opening in new tabs
+    // ═══════════════════════════════════════════════════════════════
+
+    document.querySelectorAll('a').forEach(link => {
+        const href = link.getAttribute('href') || '';
+
+        // Only fix internal links (not external URLs like https://...)
+        if (href.startsWith('/') || href.startsWith('#') || href === '' || !href.includes('://')) {
+            link.removeAttribute('target');
+
+            // Also prevent any click handlers from opening new tabs
+            link.addEventListener('click', function(e) {
+                // If it's a real link (not a # anchor for JS), let it navigate normally
+                if (href && href !== '#' && !href.startsWith('#')) {
+                    // Remove target="_blank" just before navigation
+                    this.removeAttribute('target');
+                }
+            });
+        }
+    });
 });
