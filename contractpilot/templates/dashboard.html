@@ -1,28 +1,131 @@
 {% extends "base.html" %}
+{% block navbar %}{% endblock %}
 {% block title %}Dashboard — ContractPilot{% endblock %}
 {% block content %}
-<div class="dashboard">
-    <div class="dashboard-header">
-        <div>
-            <h1>Your Contracts</h1>
-            <p id="userPlan" class="plan-badge">Loading...</p>
+<div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span>ContractPilot</span>
         </div>
-        <a href="/upload" class="btn-primary">+ New Analysis</a>
-    </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="sidebar-link active">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                Dashboard
+            </a>
+            <a href="/upload" class="sidebar-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                New Analysis
+            </a>
+            <a href="/pricing" class="sidebar-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+                Pricing
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="plan-indicator">
+                <span class="plan-dot" id="planDot"></span>
+                <span id="planName">Loading...</span>
+            </div>
+        </div>
+    </aside>
 
-    <div id="contractsList" class="contracts-grid">
-        <div class="loading">Loading your contracts...</div>
-    </div>
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Header -->
+        <header class="dashboard-header-bar">
+            <div>
+                <h1>Dashboard</h1>
+                <p class="dashboard-subtitle">Review and manage your contract analyses</p>
+            </div>
+            <a href="/upload" class="btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Analyze Contract
+            </a>
+        </header>
 
-    <div id="emptyState" class="empty-state" style="display:none">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-        </svg>
-        <h3>No contracts yet</h3>
-        <p>Upload your first contract to get an AI-powered risk analysis.</p>
-        <a href="/upload" class="btn-primary">Analyze a Contract</a>
-    </div>
+        <!-- Stats Row -->
+        <div class="stats-row" id="statsRow" style="display:none">
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number" id="statTotal">0</span>
+                    <span class="stat-label">Contracts Reviewed</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amber">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number" id="statHighRisk">0</span>
+                    <span class="stat-label">High Risk Found</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number" id="statTimeSaved">0</span>
+                    <span class="stat-label">Hours Saved</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contracts Section -->
+        <section class="contracts-section">
+            <div class="section-header">
+                <h2>Recent Contracts</h2>
+                <span class="contract-count" id="contractCount"></span>
+            </div>
+
+            <div id="contractsList">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading your contracts...</p>
+                </div>
+            </div>
+
+            <div id="emptyState" class="empty-state-card" style="display:none">
+                <div class="empty-illustration">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                </div>
+                <h3>No contracts yet</h3>
+                <p>Upload your first contract to get an AI-powered risk analysis with redlined suggestions.</p>
+                <a href="/upload" class="btn-primary">Analyze Your First Contract</a>
+            </div>
+        </section>
+    </main>
 </div>
 {% endblock %}
 
@@ -33,57 +136,92 @@ async function loadDashboard() {
     if (!token) { window.location.href = '/login'; return; }
 
     try {
-        // Load user info
         const userRes = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
         if (!userRes.ok) throw new Error('Unauthorized');
         const user = await userRes.json();
 
-        const planText = user.tier === 'pro' 
-            ? 'Pro Plan — Unlimited Analyses' 
-            : `Free Plan — ${user.analyses_used}/${user.analyses_limit} analyses used`;
-        document.getElementById('userPlan').textContent = planText;
-        document.getElementById('userPlan').className = `plan-badge ${user.tier}`;
+        const planName = document.getElementById('planName');
+        const planDot = document.getElementById('planDot');
+        if (user.tier === 'pro') {
+            planName.textContent = 'Pro Plan';
+            planDot.classList.add('pro');
+        } else {
+            planName.textContent = `Free — ${user.analyses_used}/${user.analyses_limit} used`;
+            planDot.classList.add('free');
+        }
 
-        // Load contracts
         const contractsRes = await fetch('/api/contracts', { headers: { 'Authorization': `Bearer ${token}` } });
         const contracts = await contractsRes.json();
 
         const list = document.getElementById('contractsList');
         const empty = document.getElementById('emptyState');
+        const statsRow = document.getElementById('statsRow');
+        const contractCount = document.getElementById('contractCount');
 
         if (contracts.length === 0) {
             list.style.display = 'none';
             empty.style.display = 'flex';
+            statsRow.style.display = 'none';
             return;
         }
 
-        list.innerHTML = contracts.map(c => `
-            <a href="/contracts/${c.id}" class="contract-item">
-                <div class="contract-item-header">
-                    <h4>${escapeHtml(c.title)}</h4>
-                    <span class="risk-pill ${getRiskClass(c.risk_score)}">${c.risk_score !== null ? c.risk_score + '/100' : 'Analyzing...'}</span>
+        statsRow.style.display = 'grid';
+        contractCount.textContent = `${contracts.length} total`;
+
+        document.getElementById('statTotal').textContent = contracts.length;
+        const highRisk = contracts.filter(c => c.risk_score >= 50).length;
+        document.getElementById('statHighRisk').textContent = highRisk;
+        document.getElementById('statTimeSaved').textContent = contracts.length * 3;
+
+        list.innerHTML = contracts.map(c => {
+            const riskClass = c.risk_score >= 70 ? 'critical' : c.risk_score >= 50 ? 'high' : c.risk_score >= 30 ? 'medium' : 'low';
+            const riskLabel = c.risk_score >= 70 ? 'Critical' : c.risk_score >= 50 ? 'High Risk' : c.risk_score >= 30 ? 'Medium' : 'Low Risk';
+            const statusBadge = c.status === 'completed' ?
+                `<span class="status-badge completed">Analyzed</span>` :
+                `<span class="status-badge analyzing">Analyzing...</span>`;
+            const dateStr = new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+            return `
+            <a href="/contracts/${c.id}" class="contract-row">
+                <div class="contract-row-main">
+                    <div class="contract-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                    </div>
+                    <div class="contract-details">
+                        <div class="contract-title-row">
+                            <h4>${escapeHtml(c.title)}</h4>
+                            ${statusBadge}
+                        </div>
+                        <p class="contract-meta">Uploaded on ${dateStr} · ${c.clauses?.length || 0} clauses flagged</p>
+                    </div>
                 </div>
-                <p class="contract-meta">${new Date(c.created_at).toLocaleDateString()} · ${c.status}</p>
-                <div class="contract-progress">
-                    <div class="progress-bar ${getRiskClass(c.risk_score)}" style="width: ${c.risk_score || 0}%"></div>
+                <div class="contract-row-risk">
+                    ${c.risk_score !== null ? `
+                    <div class="risk-ring ${riskClass}">
+                        <span class="risk-score">${Math.round(c.risk_score)}</span>
+                    </div>
+                    <span class="risk-label-text ${riskClass}">${riskLabel}</span>
+                    ` : '<span class="risk-label-text analyzing">Analyzing</span>'}
+                </div>
+                <div class="contract-row-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"/>
+                    </svg>
                 </div>
             </a>
-        `).join('');
+            `;
+        }).join('');
 
     } catch (err) {
         window.location.href = '/login';
     }
 }
 
-function getRiskClass(score) {
-    if (score === null) return 'analyzing';
-    if (score >= 70) return 'critical';
-    if (score >= 50) return 'high';
-    if (score >= 30) return 'medium';
-    return 'low';
-}
-
 function escapeHtml(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
