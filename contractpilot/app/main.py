@@ -1,30 +1,19 @@
-"""ContractPilot - AI Contract Negotiation Agent Micro SaaS.
-
-Inspired by Markups.ai from Google Cloud's 1,302 AI Use Cases.
-Built with FastAPI, Gemini 2.5 Pro, and Stripe.
-"""
-import os
-import shutil
-from datetime import datetime
-from typing import List
-
-from fastapi import FastAPI, Depends, HTTPException, Request, File, UploadFile, Form, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import FastAPI, Request, Depends, HTTPException, status, File, UploadFile, Form
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from PyPDF2 import PdfReader
+from datetime import datetime, timedelta
+import os
+import json
+import stripe
 
-from app.database import engine, Base, get_db
-from app.models import User, Contract, Clause, UserTier
-from app.schemas import UserCreate, UserLogin, UserResponse, ContractResponse
-from app.auth import (
-    get_password_hash, verify_password, create_access_token,
-    get_current_active_user, get_current_user
-)
+from app.database import SessionLocal, engine, Base
+from app.models import User, Contract, Clause
+from app.schemas import UserCreate, UserLogin, ContractCreate, AnalysisResponse
+from app.auth import create_access_token, verify_password, get_password_hash, get_current_user
 from app.ai_service import analyze_contract
-from app.stripe_service import create_checkout_session, handle_webhook
-from app.dependencies import require_pro_user
+from app.dependencies import require_pro
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -33,286 +22,307 @@ app = FastAPI(title="ContractPilot", version="1.0.0")
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Templates
 templates = Jinja2Templates(directory="templates")
 
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# Stripe setup
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_PRICE_ID_PRO = os.getenv("STRIPE_PRICE_ID_PRO", "")
+APP_URL = os.getenv("APP_URL", "https://contractpilot-1.onrender.com")
+
+# Dependency: get DB session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
-# ==================== AUTH API ====================
+# ═══════════════════════════════════════════════════════════════
+# PAGE ROUTES (HTML pages)
+# ═══════════════════════════════════════════════════════════════
+
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard_page(request: Request):
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
+@app.get("/upload", response_class=HTMLResponse)
+async def upload_page(request: Request):
+    return templates.TemplateResponse("upload.html", {"request": request})
+
+@app.get("/analysis", response_class=HTMLResponse)
+async def analysis_page(request: Request):
+    """Render the contract analysis page with sidebar navigation."""
+    return templates.TemplateResponse("analysis.html", {"request": request})
+
+@app.get("/pricing", response_class=HTMLResponse)
+async def pricing_page(request: Request):
+    return templates.TemplateResponse("pricing.html", {"request": request})
+
+@app.get("/success", response_class=HTMLResponse)
+async def success_page(request: Request):
+    return templates.TemplateResponse("success.html", {"request": request})
+
+@app.get("/terms", response_class=HTMLResponse)
+async def terms_page(request: Request):
+    return templates.TemplateResponse("terms.html", {"request": request})
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_page(request: Request):
+    return templates.TemplateResponse("privacy.html", {"request": request})
+
+@app.get("/cookies", response_class=HTMLResponse)
+async def cookies_page(request: Request):
+    return templates.TemplateResponse("cookies.html", {"request": request})
+
+@app.get("/security", response_class=HTMLResponse)
+async def security_page(request: Request):
+    return templates.TemplateResponse("security.html", {"request": request})
+
+@app.get("/contact", response_class=HTMLResponse)
+async def contact_page(request: Request):
+    return templates.TemplateResponse("contact.html", {"request": request})
+
+@app.get("/about", response_class=HTMLResponse)
+async def about_page(request: Request):
+    return templates.TemplateResponse("about.html", {"request": request})
+
+
+# ═══════════════════════════════════════════════════════════════
+# AUTH API ROUTES
+# ═══════════════════════════════════════════════════════════════
 
 @app.post("/api/auth/register")
-def register(user: UserCreate, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.email == user.email).first()
-    if existing:
+async def register(user: UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == user.email).first()
+    if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    db_user = User(
-        email=user.email,
-        hashed_password=get_password_hash(user.password),
-        full_name=user.full_name,
-        tier=UserTier.FREE,
-        analyses_used=0,
-        analyses_limit=1
-    )
-    db.add(db_user)
+    hashed_password = get_password_hash(user.password)
+    new_user = User(email=user.email, hashed_password=hashed_password)
+    db.add(new_user)
     db.commit()
-    db.refresh(db_user)
+    db.refresh(new_user)
 
-    token = create_access_token({"sub": str(db_user.id)})
-    return {"access_token": token, "token_type": "bearer", "user": db_user}
-
+    token = create_access_token({"sub": new_user.email})
+    return {"access_token": token, "token_type": "bearer", "plan": new_user.plan}
 
 @app.post("/api/auth/login")
-def login(credentials: UserLogin, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == credentials.email).first()
-    if not user or not verify_password(credentials.password, user.hashed_password):
+async def login(user: UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == user.email).first()
+    if not db_user or not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    token = create_access_token({"sub": str(user.id)})
-    return {"access_token": token, "token_type": "bearer", "user": user}
+    token = create_access_token({"sub": db_user.email})
+    return {"access_token": token, "token_type": "bearer", "plan": db_user.plan}
 
 
-@app.get("/api/me", response_model=UserResponse)
-def get_me(current_user: User = Depends(get_current_active_user)):
-    return current_user
+# ═══════════════════════════════════════════════════════════════
+# DASHBOARD API
+# ═══════════════════════════════════════════════════════════════
+
+@app.get("/api/dashboard")
+async def dashboard_data(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    contracts = db.query(Contract).filter(Contract.user_id == current_user.id).all()
+
+    total_contracts = len(contracts)
+    monthly_analyses = len([c for c in contracts if c.created_at and c.created_at.month == datetime.now().month])
+
+    risk_scores = [c.risk_score for c in contracts if c.risk_score is not None]
+    avg_risk = sum(risk_scores) / len(risk_scores) if risk_scores else 0
+
+    return {
+        "total_contracts": total_contracts,
+        "monthly_analyses": monthly_analyses,
+        "avg_risk": avg_risk,
+        "plan": current_user.plan,
+        "contracts": [
+            {
+                "id": c.id,
+                "filename": c.filename,
+                "created_at": c.created_at.isoformat() if c.created_at else None,
+                "risk_score": c.risk_score,
+                "clause_count": len(c.clauses) if c.clauses else 0
+            }
+            for c in contracts
+        ]
+    }
 
 
-# ==================== CONTRACT API ====================
+# ═══════════════════════════════════════════════════════════════
+# CONTRACT UPLOAD & ANALYSIS API
+# ═══════════════════════════════════════════════════════════════
 
-@app.post("/api/contracts/analyze")
-async def analyze_contract_endpoint(
-    title: str = Form(...),
+@app.post("/api/contracts/upload")
+async def upload_contract(
     file: UploadFile = File(...),
-    current_user: User = Depends(require_pro_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Upload and analyze a contract."""
-    if not file.filename.endswith((".pdf", ".txt")):
-        raise HTTPException(status_code=400, detail="Only PDF and TXT files supported")
+    # Read file content
+    content = await file.read()
 
-    # Save file
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    safe_filename = f"{current_user.id}_{timestamp}_{file.filename}"
-    file_path = os.path.join(UPLOAD_DIR, safe_filename)
-
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    # Extract text
-    try:
-        if file.filename.endswith(".pdf"):
-            reader = PdfReader(file_path)
+    # Extract text from PDF or use raw text
+    if file.filename.endswith(".pdf"):
+        try:
+            import PyPDF2
+            from io import BytesIO
+            reader = PyPDF2.PdfReader(BytesIO(content))
             text = "\n".join([page.extract_text() or "" for page in reader.pages])
-        else:
-            with open(file_path, "r", encoding="utf-8") as f:
-                text = f.read()
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Could not read file: {str(e)}")
+        except Exception:
+            text = content.decode("utf-8", errors="ignore")
+    else:
+        text = content.decode("utf-8", errors="ignore")
 
-    if len(text) < 100:
-        raise HTTPException(status_code=400, detail="Contract text too short or unreadable")
-
-    # Create contract record
+    # Save contract to DB
     contract = Contract(
-        title=title,
-        filename=safe_filename,
-        original_text=text[:50000],  # Limit storage
-        status="analyzing",
-        owner_id=current_user.id
+        user_id=current_user.id,
+        filename=file.filename,
+        content=text,
+        risk_score=0
     )
     db.add(contract)
     db.commit()
     db.refresh(contract)
 
-    # Call AI analysis
-    try:
-        result = await analyze_contract(text[:15000])  # Send first 15k chars
+    # Run AI analysis
+    analysis = analyze_contract(text)
 
-        contract.risk_score = result["overall_risk_score"]
-        contract.status = "completed"
-
-        for clause_data in result["clauses"]:
-            clause = Clause(
-                contract_id=contract.id,
-                clause_type=clause_data["clause_type"],
-                original_text=clause_data["original_text"][:2000],
-                risk_level=clause_data["risk_level"],
-                explanation=clause_data["explanation"],
-                suggested_revision=clause_data.get("suggested_revision", "")[:2000]
-            )
-            db.add(clause)
-
-        # Increment usage for free users
-        if current_user.tier.value == "free":
-            current_user.analyses_used += 1
-
-        db.commit()
-
-    except Exception as e:
-        contract.status = "failed"
-        db.commit()
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
-
-    return {"redirect": f"/contracts/{contract.id}"}
-
-
-@app.get("/api/contracts", response_model=List[ContractResponse])
-def list_contracts(
-    current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
-):
-    contracts = db.query(Contract).filter(Contract.owner_id == current_user.id).order_by(Contract.created_at.desc()).all()
-    return contracts
-
-
-@app.get("/api/contracts/{contract_id}", response_model=ContractResponse)
-def get_contract(
-    contract_id: int,
-    current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
-):
-    contract = db.query(Contract).filter(Contract.id == contract_id, Contract.owner_id == current_user.id).first()
-    if not contract:
-        raise HTTPException(status_code=404, detail="Contract not found")
-    return contract
-
-
-@app.delete("/api/contracts/{contract_id}")
-def delete_contract(
-    contract_id: int,
-    current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
-):
-    contract = db.query(Contract).filter(Contract.id == contract_id, Contract.owner_id == current_user.id).first()
-    if not contract:
-        raise HTTPException(status_code=404, detail="Contract not found")
-
-    # Delete file
-    file_path = os.path.join(UPLOAD_DIR, contract.filename)
-    if os.path.exists(file_path):
-        os.remove(file_path)
-
-    db.delete(contract)
+    # Update contract with risk score
+    contract.risk_score = analysis.get("risk_score", 0)
     db.commit()
-    return {"status": "deleted"}
 
+    # Save clauses
+    for clause_data in analysis.get("clauses", []):
+        clause = Clause(
+            contract_id=contract.id,
+            title=clause_data.get("title", ""),
+            severity=clause_data.get("severity", "LOW"),
+            explanation=clause_data.get("explanation", ""),
+            original_text=clause_data.get("original_text", ""),
+            suggested_text=clause_data.get("suggested_text", "")
+        )
+        db.add(clause)
 
-# ==================== PAYMENTS API ====================
+    db.commit()
 
-@app.post("/api/payments/checkout")
-def create_payment_session(
-    current_user: User = Depends(get_current_active_user)
+    return {"contract_id": contract.id, "redirect": f"/analysis?id={contract.id}"}
+
+@app.get("/api/contracts/{contract_id}/analysis")
+async def get_analysis(
+    contract_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
-    """Create Stripe checkout session for Pro upgrade."""
-    session = create_checkout_session(current_user.id, current_user.email)
-    return session
+    contract = db.query(Contract).filter(
+        Contract.id == contract_id,
+        Contract.user_id == current_user.id
+    ).first()
 
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+
+    clauses = db.query(Clause).filter(Clause.contract_id == contract_id).all()
+
+    return {
+        "risk_score": contract.risk_score,
+        "clauses": [
+            {
+                "title": c.title,
+                "severity": c.severity,
+                "explanation": c.explanation,
+                "original_text": c.original_text,
+                "suggested_text": c.suggested_text
+            }
+            for c in clauses
+        ]
+    }
+
+
+# ═══════════════════════════════════════════════════════════════
+# STRIPE PAYMENTS API
+# ═══════════════════════════════════════════════════════════════
+
+@app.post("/api/payments/create-checkout-session")
+async def create_checkout_session(current_user: User = Depends(get_current_user)):
+    if not STRIPE_PRICE_ID_PRO:
+        raise HTTPException(status_code=500, detail="Stripe price ID not configured")
+
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{
+                "price": STRIPE_PRICE_ID_PRO,
+                "quantity": 1,
+            }],
+            mode="subscription",
+            success_url=f"{APP_URL}/success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{APP_URL}/pricing",
+            client_reference_id=str(current_user.id),
+        )
+        return {"checkout_url": session.url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/payments/webhook")
-async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
-    """Handle Stripe webhooks."""
+async def stripe_webhook(request: Request):
+    """
+    Handle Stripe webhook events for payment processing.
+    Supports both test and live mode webhooks.
+    """
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
+    webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 
-    result = handle_webhook(payload, sig_header)
+    try:
+        if webhook_secret:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, webhook_secret
+            )
+        else:
+            # Fallback: parse without verification (NOT for production)
+            event = json.loads(payload)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid payload")
+    except stripe.error.SignatureVerificationError:
+        raise HTTPException(status_code=400, detail="Invalid signature")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-    if result["type"] == "checkout.completed":
-        user = db.query(User).filter(User.id == result["user_id"]).first()
-        if user:
-            user.tier = UserTier.PRO
-            user.analyses_limit = 999999
-            user.stripe_customer_id = result["customer_id"]
-            user.stripe_subscription_id = result["subscription_id"]
-            db.commit()
+    # Handle the event
+    event_type = event.get("type", "")
 
-    elif result["type"] == "subscription.cancelled":
-        user = db.query(User).filter(User.stripe_subscription_id == result["subscription_id"]).first()
-        if user:
-            user.tier = UserTier.FREE
-            user.analyses_limit = 1
-            user.stripe_subscription_id = None
-            db.commit()
+    if event_type == "checkout.session.completed":
+        session = event["data"]["object"]
+        print(f"Payment successful for session: {session.get('id')}")
+        # TODO: Update user plan to "pro" in database
+        # user_id = session.get("client_reference_id")
 
-    return {"status": "ok"}
+    elif event_type == "invoice.payment_succeeded":
+        invoice = event["data"]["object"]
+        print(f"Invoice payment succeeded: {invoice.get('id')}")
 
+    elif event_type == "invoice.payment_failed":
+        invoice = event["data"]["object"]
+        print(f"Invoice payment failed: {invoice.get('id')}")
 
-# ==================== HTML PAGES ====================
+    elif event_type == "customer.subscription.deleted":
+        subscription = event["data"]["object"]
+        print(f"Subscription cancelled: {subscription.get('id')}")
+        # TODO: Downgrade user to free plan
 
-@app.get("/", response_class=HTMLResponse)
-def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.get("/login", response_class=HTMLResponse)
-def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
-
-
-@app.get("/register", response_class=HTMLResponse)
-def register_page(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request})
-
-
-@app.get("/dashboard", response_class=HTMLResponse)
-def dashboard(request: Request):
-    return templates.TemplateResponse("dashboard.html", {"request": request})
-
-
-@app.get("/upload", response_class=HTMLResponse)
-def upload_page(request: Request):
-    return templates.TemplateResponse("upload.html", {"request": request})
-
-
-@app.get("/contracts/{contract_id}", response_class=HTMLResponse)
-def analysis_page(request: Request, contract_id: int):
-    return templates.TemplateResponse("analysis.html", {"request": request, "contract_id": contract_id})
-
-
-@app.get("/pricing", response_class=HTMLResponse)
-def pricing_page(request: Request):
-    stripe_pk = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
-    return templates.TemplateResponse("pricing.html", {"request": request, "stripe_pk": stripe_pk})
-
-
-@app.get("/pricing/success", response_class=HTMLResponse)
-def pricing_success(request: Request):
-    return templates.TemplateResponse("success.html", {"request": request})
-
-
-
-
-# ==================== LEGAL & INFO PAGES ====================
-
-@app.get("/terms", response_class=HTMLResponse)
-def terms_page(request: Request):
-    return templates.TemplateResponse("terms.html", {"request": request})
-
-
-@app.get("/privacy", response_class=HTMLResponse)
-def privacy_page(request: Request):
-    return templates.TemplateResponse("privacy.html", {"request": request})
-
-
-@app.get("/cookies", response_class=HTMLResponse)
-def cookies_page(request: Request):
-    return templates.TemplateResponse("cookies.html", {"request": request})
-
-
-@app.get("/security", response_class=HTMLResponse)
-def security_page(request: Request):
-    return templates.TemplateResponse("security.html", {"request": request})
-
-
-@app.get("/contact", response_class=HTMLResponse)
-def contact_page(request: Request):
-    return templates.TemplateResponse("contact.html", {"request": request})
-
-
-@app.get("/about", response_class=HTMLResponse)
-def about_page(request: Request):
-    return templates.TemplateResponse("about.html", {"request": request})
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    return {"status": "success", "event": event_type}
