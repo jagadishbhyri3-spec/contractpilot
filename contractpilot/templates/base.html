@@ -8,6 +8,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     {% block extra_css %}{% endblock %}
+
+    <!-- IMMEDIATE FIX: Stop internal links from opening in new tabs -->
+    <script>
+    (function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('a[target="_blank"]').forEach(function(link) {
+                var href = link.getAttribute('href') || '';
+                if (href.indexOf('://') === -1 || href.indexOf(window.location.host) !== -1) {
+                    link.removeAttribute('target');
+                }
+            });
+        });
+    })();
+    </script>
 <base target="_blank">
 </head>
 <body>
