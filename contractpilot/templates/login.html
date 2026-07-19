@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Log In — ContractPilot{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Welcome Back</h1>
+        <p>Log in to access your contract analyses.</p>
+        <form id="loginForm" class="auth-form">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" required placeholder="you@company.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn-primary btn-full">Log In</button>
+        </form>
+        <p class="auth-footer">Don't have an account? <a href="/register">Sign up free</a></p>
+        <div id="loginError" class="alert alert-error" style="display:none"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const data = { email: form.email.value, password: form.password.value };
+
+    try {
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (res.ok) {
+            localStorage.setItem('token', result.access_token);
+            window.location.href = '/dashboard';
+        } else {
+            document.getElementById('loginError').textContent = result.detail || 'Login failed';
+            document.getElementById('loginError').style.display = 'block';
+        }
+    } catch (err) {
+        document.getElementById('loginError').textContent = 'Network error. Please try again.';
+        document.getElementById('loginError').style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

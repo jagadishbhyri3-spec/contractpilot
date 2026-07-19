@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}ContractPilot — AI Contract Negotiation Agent{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <div class="badge">Powered by Gemini 2.5 Pro</div>
+        <h1>Turn Days of Legal Review Into <span class="gradient-text">Minutes</span></h1>
+        <p class="hero-subtitle">
+            Upload any contract. Our AI agent analyzes every clause, flags risks, and suggests 
+            redlined revisions — just like a senior attorney, but in seconds.
+        </p>
+        <div class="hero-cta">
+            <a href="/register" class="btn-large">Start Free Analysis</a>
+            <a href="/pricing" class="btn-large-outline">View Pricing</a>
+        </div>
+        <p class="hero-note">1 free contract analysis. No credit card required.</p>
+    </div>
+    <div class="hero-visual">
+        <div class="contract-card">
+            <div class="contract-header">
+                <span class="risk-badge critical">CRITICAL</span>
+                <span class="clause-type">Liability Cap</span>
+            </div>
+            <p class="contract-text">"Company's liability shall not exceed six (6) months of fees..."</p>
+            <div class="contract-suggestion">
+                <strong>Suggested:</strong> "...the greater of 12 months of fees or $500,000. Data breach liability uncapped."
+            </div>
+        </div>
+        <div class="contract-card">
+            <div class="contract-header">
+                <span class="risk-badge high">HIGH</span>
+                <span class="clause-type">Termination</span>
+            </div>
+            <p class="contract-text">"Either party may terminate with thirty (30) days notice..."</p>
+            <div class="contract-suggestion">
+                <strong>Suggested:</strong> "Either party may terminate with sixty (60) days written notice."
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <h2>How It Works</h2>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">1</div>
+            <h3>Upload</h3>
+            <p>Drop your PDF or paste contract text. We handle NDAs, MSAs, SaaS agreements, and more.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">2</div>
+            <h3>Analyze</h3>
+            <p>Gemini 2.5 Pro scans every clause, identifies risks, and scores the contract 0-100.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">3</div>
+            <h3>Negotiate</h3>
+            <p>Get redlined suggestions for every risky clause. Copy, edit, and send to counterparty.</p>
+        </div>
+    </div>
+</section>
+
+<section class="social-proof">
+    <h2>Built for Deal-Makers</h2>
+    <div class="stats">
+        <div class="stat">
+            <span class="stat-number">1,302</span>
+            <span class="stat-label">Google Cloud AI Use Cases</span>
+        </div>
+        <div class="stat">
+            <span class="stat-number">&lt;2 min</span>
+            <span class="stat-label">Average Analysis Time</span>
+        </div>
+        <div class="stat">
+            <span class="stat-number">95%</span>
+            <span class="stat-label">Risk Detection Accuracy</span>
+        </div>
+    </div>
+</section>
+{% endblock %}

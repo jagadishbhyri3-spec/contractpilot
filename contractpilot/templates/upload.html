@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Analyze Contract — ContractPilot{% endblock %}
+{% block content %}
+<div class="upload-page">
+    <div class="upload-card">
+        <h1>Analyze a Contract</h1>
+        <p>Upload a PDF or text file. Our AI will analyze risks and suggest revisions.</p>
+
+        <form id="uploadForm" class="upload-form">
+            <div class="form-group">
+                <label>Contract Title</label>
+                <input type="text" name="title" required placeholder="e.g., SaaS Agreement - Acme Corp">
+            </div>
+
+            <div class="form-group">
+                <label>Contract File (PDF or TXT)</label>
+                <div class="file-dropzone" id="dropzone">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <p>Drag & drop your file here, or <span class="text-link">browse</span></p>
+                    <p class="file-hint">PDF or TXT up to 10MB</p>
+                    <input type="file" name="file" id="fileInput" accept=".pdf,.txt" required>
+                </div>
+                <div id="fileName" class="file-name"></div>
+            </div>
+
+            <button type="submit" class="btn-primary btn-full" id="submitBtn">
+                <span id="btnText">Start Analysis</span>
+                <span id="btnSpinner" class="spinner" style="display:none"></span>
+            </button>
+        </form>
+
+        <div id="uploadError" class="alert alert-error" style="display:none"></div>
+        <div id="uploadSuccess" class="alert alert-success" style="display:none"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const fileName = document.getElementById('fileName');
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        showFileName(e.dataTransfer.files[0].name);
+    }
+});
+
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) showFileName(fileInput.files[0].name);
+});
+
+function showFileName(name) {
+    fileName.textContent = `Selected: ${name}`;
+    fileName.style.display = 'block';
+}
+
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login'; return; }
+
+    const form = e.target;
+    const formData = new FormData();
+    formData.append('title', form.title.value);
+    formData.append('file', fileInput.files[0]);
+
+    document.getElementById('btnText').style.display = 'none';
+    document.getElementById('btnSpinner').style.display = 'inline-block';
+    document.getElementById('submitBtn').disabled = true;
+
+    try {
+        const res = await fetch('/api/contracts/analyze', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+        const result = await res.json();
+
+        if (res.ok && result.redirect) {
+            window.location.href = result.redirect;
+        } else {
+            document.getElementById('uploadError').textContent = result.detail || 'Analysis failed';
+            document.getElementById('uploadError').style.display = 'block';
+            document.getElementById('btnText').style.display = 'inline';
+            document.getElementById('btnSpinner').style.display = 'none';
+            document.getElementById('submitBtn').disabled = false;
+        }
+    } catch (err) {
+        document.getElementById('uploadError').textContent = 'Network error. Please try again.';
+        document.getElementById('uploadError').style.display = 'block';
+        document.getElementById('btnText').style.display = 'inline';
+        document.getElementById('btnSpinner').style.display = 'none';
+        document.getElementById('submitBtn').disabled = false;
+    }
+});
+</script>
+{% endblock %}

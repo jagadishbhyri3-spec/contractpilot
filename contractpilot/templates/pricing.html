@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Pricing — ContractPilot{% endblock %}
+{% block content %}
+<div class="pricing-page">
+    <h1>Simple Pricing</h1>
+    <p class="pricing-subtitle">Start free. Upgrade when you need more power.</p>
+
+    <div class="pricing-grid">
+        <div class="pricing-card">
+            <div class="pricing-header">
+                <h3>Free</h3>
+                <div class="price">$0</div>
+                <p>Perfect for trying it out</p>
+            </div>
+            <ul class="pricing-features">
+                <li>1 contract analysis</li>
+                <li>Risk scoring (0-100)</li>
+                <li>Clause identification</li>
+                <li>Basic revision suggestions</li>
+            </ul>
+            <a href="/register" class="btn-outline btn-full">Get Started</a>
+        </div>
+
+        <div class="pricing-card featured">
+            <div class="popular-badge">Most Popular</div>
+            <div class="pricing-header">
+                <h3>Pro</h3>
+                <div class="price">$29<span>/month</span></div>
+                <p>For professionals who close deals</p>
+            </div>
+            <ul class="pricing-features">
+                <li><strong>Unlimited</strong> contract analyses</li>
+                <li>Advanced risk scoring</li>
+                <li>Redlined revision suggestions</li>
+                <li>Export to Word/PDF</li>
+                <li>Priority support</li>
+            </ul>
+            <button id="checkoutBtn" class="btn-primary btn-full">Upgrade to Pro</button>
+            <div id="checkoutError" class="alert alert-error" style="display:none;margin-top:1rem"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('checkoutBtn').addEventListener('click', async () => {
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/register'; return; }
+
+    document.getElementById('checkoutBtn').disabled = true;
+    document.getElementById('checkoutBtn').textContent = 'Loading...';
+
+    try {
+        const res = await fetch('/api/payments/checkout', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await res.json();
+
+        if (res.ok && result.checkout_url) {
+            window.location.href = result.checkout_url;
+        } else {
+            document.getElementById('checkoutError').textContent = result.detail || 'Checkout failed';
+            document.getElementById('checkoutError').style.display = 'block';
+            document.getElementById('checkoutBtn').disabled = false;
+            document.getElementById('checkoutBtn').textContent = 'Upgrade to Pro';
+        }
+    } catch (err) {
+        document.getElementById('checkoutError').textContent = 'Network error. Please try again.';
+        document.getElementById('checkoutError').style.display = 'block';
+        document.getElementById('checkoutBtn').disabled = false;
+        document.getElementById('checkoutBtn').textContent = 'Upgrade to Pro';
+    }
+});
+</script>
+{% endblock %}

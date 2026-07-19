@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Analysis Results — ContractPilot{% endblock %}
+{% block content %}
+<div class="analysis-page">
+    <div class="analysis-header">
+        <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+        <div class="analysis-actions">
+            <button id="deleteBtn" class="btn-danger-outline">Delete</button>
+        </div>
+    </div>
+
+    <div id="analysisContent">
+        <div class="loading">Loading analysis...</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const contractId = {{ contract_id }};
+
+async function loadAnalysis() {
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login'; return; }
+
+    try {
+        const res = await fetch(`/api/contracts/${contractId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Not found');
+        const contract = await res.json();
+
+        const container = document.getElementById('analysisContent');
+
+        if (contract.status === 'analyzing') {
+            container.innerHTML = `
+                <div class="analyzing-state">
+                    <div class="spinner-large"></div>
+                    <h2>Analyzing your contract...</h2>
+                    <p>This usually takes 30-60 seconds. Gemini 2.5 Pro is reviewing every clause.</p>
+                </div>
+            `;
+            setTimeout(loadAnalysis, 3000);
+            return;
+        }
+
+        const riskClass = contract.risk_score >= 70 ? 'critical' : contract.risk_score >= 50 ? 'high' : contract.risk_score >= 30 ? 'medium' : 'low';
+
+        container.innerHTML = `
+            <div class="analysis-overview">
+                <h1>${escapeHtml(contract.title)}</h1>
+                <div class="risk-dashboard">
+                    <div class="risk-score-card ${riskClass}">
+                        <span class="risk-number">${contract.risk_score}</span>
+                        <span class="risk-label">Risk Score / 100</span>
+                    </div>
+                    <div class="risk-summary">
+                        <h3>Executive Summary</h3>
+                        <p>${escapeHtml(contract.clauses[0]?.explanation || 'Analysis complete.')}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="clauses-section">
+                <h2>Flagged Clauses (${contract.clauses.length})</h2>
+                ${contract.clauses.map(clause => `
+                    <div class="clause-card ${clause.risk_level}">
+                        <div class="clause-header">
+                            <span class="clause-type-badge">${escapeHtml(clause.clause_type)}</span>
+                            <span class="risk-badge ${clause.risk_level}">${clause.risk_level.toUpperCase()}</span>
+                        </div>
+                        <div class="clause-body">
+                            <div class="clause-section">
+                                <label>Original Language</label>
+                                <div class="original-text">${escapeHtml(clause.original_text)}</div>
+                            </div>
+                            <div class="clause-section">
+                                <label>Risk Analysis</label>
+                                <p>${escapeHtml(clause.explanation)}</p>
+                            </div>
+                            ${clause.suggested_revision ? `
+                            <div class="clause-section suggestion">
+                                <label>Suggested Revision</label>
+                                <div class="suggested-text">${escapeHtml(clause.suggested_revision)}</div>
+                                <button class="btn-small btn-copy" onclick="copyText(this, '${escapeHtml(clause.suggested_revision).replace(/'/g, "\'")}')">Copy</button>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+    } catch (err) {
+        document.getElementById('analysisContent').innerHTML = `
+            <div class="alert alert-error">Could not load analysis. <a href="/dashboard">Go to dashboard</a></div>
+        `;
+    }
+}
+
+document.getElementById('deleteBtn').addEventListener('click', async () => {
+    if (!confirm('Delete this contract analysis?')) return;
+    const token = localStorage.getItem('token');
+    await fetch(`/api/contracts/${contractId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    window.location.href = '/dashboard';
+});
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function copyText(btn, text) {
+    navigator.clipboard.writeText(text);
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+}
+
+loadAnalysis();
+</script>
+{% endblock %}

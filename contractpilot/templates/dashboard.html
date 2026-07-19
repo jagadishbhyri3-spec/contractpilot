@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — ContractPilot{% endblock %}
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <div>
+            <h1>Your Contracts</h1>
+            <p id="userPlan" class="plan-badge">Loading...</p>
+        </div>
+        <a href="/upload" class="btn-primary">+ New Analysis</a>
+    </div>
+
+    <div id="contractsList" class="contracts-grid">
+        <div class="loading">Loading your contracts...</div>
+    </div>
+
+    <div id="emptyState" class="empty-state" style="display:none">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <h3>No contracts yet</h3>
+        <p>Upload your first contract to get an AI-powered risk analysis.</p>
+        <a href="/upload" class="btn-primary">Analyze a Contract</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadDashboard() {
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login'; return; }
+
+    try {
+        // Load user info
+        const userRes = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!userRes.ok) throw new Error('Unauthorized');
+        const user = await userRes.json();
+
+        const planText = user.tier === 'pro' 
+            ? 'Pro Plan — Unlimited Analyses' 
+            : `Free Plan — ${user.analyses_used}/${user.analyses_limit} analyses used`;
+        document.getElementById('userPlan').textContent = planText;
+        document.getElementById('userPlan').className = `plan-badge ${user.tier}`;
+
+        // Load contracts
+        const contractsRes = await fetch('/api/contracts', { headers: { 'Authorization': `Bearer ${token}` } });
+        const contracts = await contractsRes.json();
+
+        const list = document.getElementById('contractsList');
+        const empty = document.getElementById('emptyState');
+
+        if (contracts.length === 0) {
+            list.style.display = 'none';
+            empty.style.display = 'flex';
+            return;
+        }
+
+        list.innerHTML = contracts.map(c => `
+            <a href="/contracts/${c.id}" class="contract-item">
+                <div class="contract-item-header">
+                    <h4>${escapeHtml(c.title)}</h4>
+                    <span class="risk-pill ${getRiskClass(c.risk_score)}">${c.risk_score !== null ? c.risk_score + '/100' : 'Analyzing...'}</span>
+                </div>
+                <p class="contract-meta">${new Date(c.created_at).toLocaleDateString()} · ${c.status}</p>
+                <div class="contract-progress">
+                    <div class="progress-bar ${getRiskClass(c.risk_score)}" style="width: ${c.risk_score || 0}%"></div>
+                </div>
+            </a>
+        `).join('');
+
+    } catch (err) {
+        window.location.href = '/login';
+    }
+}
+
+function getRiskClass(score) {
+    if (score === null) return 'analyzing';
+    if (score >= 70) return 'critical';
+    if (score >= 50) return 'high';
+    if (score >= 30) return 'medium';
+    return 'low';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+loadDashboard();
+</script>
+{% endblock %}
