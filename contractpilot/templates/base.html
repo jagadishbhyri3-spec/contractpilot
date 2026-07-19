@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ContractPilot{% endblock %}</title>
+    <meta name="description" content="ContractPilot — AI Contract Negotiation Agent. Turn days of legal review into minutes with AI-powered risk analysis and redlined suggestions.">
+    <meta name="keywords" content="AI contract review, contract negotiation, legal tech, risk analysis, SaaS">
+    <meta property="og:title" content="ContractPilot — AI Contract Negotiation Agent">
+    <meta property="og:description" content="Upload any contract. Our AI flags risks and suggests redlined revisions in seconds.">
+    <meta property="og:type" content="website">
+    <title>{% block title %}ContractPilot — AI Contract Negotiation Agent{% endblock %}</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -23,7 +28,10 @@
         </div>
         <div class="nav-links" id="navLinks">
             <a href="/">Home</a>
+            <a href="/about">About</a>
             <a href="/pricing">Pricing</a>
+            <a href="/security">Security</a>
+            <a href="/contact">Contact</a>
             <a href="/dashboard" id="navDashboard" style="display:none">Dashboard</a>
             <a href="/upload" id="navUpload" style="display:none" class="btn-primary">Analyze Contract</a>
             <a href="/login" id="navLogin">Log In</a>
@@ -37,8 +45,46 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="footer">
-        <p>ContractPilot — AI Contract Negotiation Agent. Inspired by Google Cloud's 1,302 AI Use Cases.</p>
+    <footer class="site-footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <span>ContractPilot</span>
+                </div>
+                <p>AI-powered contract negotiation. Turn days of legal review into minutes.</p>
+                <div class="footer-social">
+                    <a href="https://twitter.com/contractpilot" target="_blank" aria-label="Twitter">𝕏</a>
+                    <a href="https://linkedin.com/company/contractpilot" target="_blank" aria-label="LinkedIn">in</a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Product</h4>
+                <a href="/">Home</a>
+                <a href="/pricing">Pricing</a>
+                <a href="/about">About</a>
+                <a href="/security">Security</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="/terms">Terms of Service</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/cookies">Cookie Policy</a>
+            </div>
+            <div class="footer-col">
+                <h4>Support</h4>
+                <a href="/contact">Contact Us</a>
+                <a href="mailto:support@contractpilot.co">support@contractpilot.co</a>
+                <a href="mailto:security@contractpilot.co">Report a Vulnerability</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>ContractPilot Ltd. All rights reserved.</p>
+            <p class="footer-compliance">GDPR Compliant · SOC 2 Aligned · EU Data Hosting</p>
+        </div>
     </footer>
 
     <script src="/static/js/app.js"></script>
