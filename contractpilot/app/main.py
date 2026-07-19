@@ -9,6 +9,7 @@ from datetime import datetime
 from typing import List
 
 from fastapi import FastAPI, Depends, HTTPException, Request, File, UploadFile, Form, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -30,6 +31,13 @@ from app.dependencies import require_pro_user
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="ContractPilot", version="1.0.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
