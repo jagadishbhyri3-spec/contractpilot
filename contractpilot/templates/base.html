@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    {% block navbar %}
     <nav class="navbar">
         <div class="nav-brand">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -30,6 +31,7 @@
             <button id="navLogout" style="display:none" class="btn-ghost">Logout</button>
         </div>
     </nav>
+    {% endblock %}
 
     <main>
         {% block content %}{% endblock %}
