@@ -1149,3 +1149,18 @@ body.has-sidebar .site-footer {
 .sidebar-footer > img {
     display: none !important;
 }
+
+/* Hide arrow icon in sidebar - stronger override */
+.sidebar::after,
+.sidebar::before,
+.sidebar-footer::after,
+.sidebar-footer::before,
+.sidebar-nav::after,
+.sidebar-nav::before,
+.sidebar-brand::after,
+.sidebar-brand::before {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    background-image: none !important;
+}
