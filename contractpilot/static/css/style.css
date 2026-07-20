@@ -98,12 +98,18 @@ a { color: inherit; text-decoration: none; }
     transition: all 0.2s;
 }
 
-.btn-primary {
+.btn-primary,
+button.btn-primary {
     background: var(--primary);
     color: white;
 }
 
-.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:hover,
+button.btn-primary:hover { background: var(--primary-hover); }
+
+.btn-full {
+    width: 100%;
+}
 
 .btn-secondary {
     background: var(--slate-800);
@@ -327,7 +333,11 @@ a { color: inherit; text-decoration: none; }
     padding: 3rem 2rem 1.5rem;
     margin-top: auto;
     border-top: 1px solid var(--slate-800);
-    margin-left: 240px;  /* FIX: offset for sidebar on dashboard pages */
+}
+
+/* Dashboard pages have sidebar — offset footer */
+body.has-sidebar .site-footer {
+    margin-left: 240px;
 }
 
 .footer-grid {
@@ -1060,7 +1070,7 @@ a { color: inherit; text-decoration: none; }
         margin-left: 0;
     }
 
-    .site-footer {
+    body.has-sidebar .site-footer {
         margin-left: 0;
     }
 
