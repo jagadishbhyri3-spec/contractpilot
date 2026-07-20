@@ -1141,3 +1141,11 @@ body.has-sidebar .site-footer {
     display: none !important;
     content: none !important;
 }
+
+/* Hide stray arrow icon in sidebar */
+.sidebar > svg,
+.sidebar > img,
+.sidebar-footer > svg:not(.nav-item svg),
+.sidebar-footer > img {
+    display: none !important;
+}
