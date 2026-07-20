@@ -2,32 +2,36 @@
 
 {% block title %}ContractPilot — AI Contract Negotiation Agent{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/homepage.css?v=2">
+{% endblock %}
+
 {% block content %}
 <!-- Hero Section -->
-<section class="hero" id="hero">
-    <div class="hero-bg"></div>
-    <div class="hero-grid"></div>
-    <div class="hero-content">
-        <div class="hero-badge">
-            <span class="dot"></span>
+<section class="hp-hero" id="hero">
+    <div class="hp-hero-bg"></div>
+    <div class="hp-hero-grid"></div>
+    <div class="hp-hero-content">
+        <div class="hp-hero-badge">
+            <span class="hp-dot"></span>
             Powered by Gemini 2.5 Pro
         </div>
         <h1>Turn Days of Legal Review Into Minutes</h1>
-        <p class="hero-subtitle">Upload any contract. Our AI agent analyzes every clause, flags risks, and suggests redlined revisions — just like a senior attorney, but in seconds.</p>
-        <div class="hero-cta-group">
+        <p class="hp-hero-subtitle">Upload any contract. Our AI agent analyzes every clause, flags risks, and suggests redlined revisions — just like a senior attorney, but in seconds.</p>
+        <div class="hp-hero-cta-group">
             <a href="/register" class="btn btn-primary">Analyze a contract for free</a>
-            <div class="hero-note">
-                <span><span class="check">✓</span> 1 free contract analysis</span>
-                <span><span class="check">✓</span> No credit card required</span>
+            <div class="hp-hero-note">
+                <span><span class="hp-check">✓</span> 1 free contract analysis</span>
+                <span><span class="hp-check">✓</span> No credit card required</span>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Credibility Strip -->
-<div class="cred-strip">
-    <div class="cred-container">
-        <div class="cred-item">
+<div class="hp-cred-strip">
+    <div class="hp-cred-container">
+        <div class="hp-cred-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                 <path d="M2 17l10 5 10-5"/>
@@ -35,20 +39,20 @@
             </svg>
             Powered by Gemini 2.5 Pro
         </div>
-        <div class="cred-item">
+        <div class="hp-cred-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
             GDPR Compliant
         </div>
-        <div class="cred-item">
+        <div class="hp-cred-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                 <path d="M7 11V7a5 5 0 0110 0v4"/>
             </svg>
             SOC 2 Aligned
         </div>
-        <div class="cred-item">
+        <div class="hp-cred-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M2 12h20"/>
@@ -60,62 +64,62 @@
 </div>
 
 <!-- Clause Examples -->
-<section class="clauses-section" id="clauses">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-label">See It In Action</span>
+<section class="hp-clauses-section" id="clauses">
+    <div class="hp-container">
+        <div class="hp-section-header">
+            <span class="hp-section-label">See It In Action</span>
             <h2>Real Clause Analysis, Real Protection</h2>
             <p>Our AI doesn't just flag risks — it gives you battle-tested redlines, just like a senior attorney would.</p>
         </div>
-        <div class="clauses-grid">
-            <div class="clause-card">
-                <div class="clause-header">
-                    <span class="risk-badge risk-critical">Critical</span>
-                    <span class="clause-title">Liability Cap</span>
+        <div class="hp-clauses-grid">
+            <div class="hp-clause-card">
+                <div class="hp-clause-header">
+                    <span class="hp-risk-badge hp-risk-critical">Critical</span>
+                    <span class="hp-clause-title">Liability Cap</span>
                 </div>
-                <div class="clause-body">
-                    <div class="clause-block">
-                        <div class="clause-label label-original">
+                <div class="hp-clause-body">
+                    <div class="hp-clause-block">
+                        <div class="hp-clause-label hp-label-original">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             Original Clause
                         </div>
-                        <div class="clause-text">
-                            "Company's liability shall not exceed <span class="strikethrough">six (6) months</span> of fees paid under this Agreement."
+                        <div class="hp-clause-text">
+                            "Company's liability shall not exceed <span class="hp-strikethrough">six (6) months</span> of fees paid under this Agreement."
                         </div>
                     </div>
-                    <div class="clause-block">
-                        <div class="clause-label label-suggested">
+                    <div class="hp-clause-block">
+                        <div class="hp-clause-label hp-label-suggested">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                             Suggested Redline
                         </div>
-                        <div class="clause-text suggested">
-                            "Company's liability shall not exceed <span class="highlight">the greater of twelve (12) months of fees or $500,000</span>. <span class="addition">Data breach liability shall be uncapped.</span>"
+                        <div class="hp-clause-text hp-suggested">
+                            "Company's liability shall not exceed <span class="hp-highlight">the greater of twelve (12) months of fees or $500,000</span>. <span class="hp-addition">Data breach liability shall be uncapped.</span>"
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="clause-card">
-                <div class="clause-header">
-                    <span class="risk-badge risk-high">High</span>
-                    <span class="clause-title">Termination</span>
+            <div class="hp-clause-card">
+                <div class="hp-clause-header">
+                    <span class="hp-risk-badge hp-risk-high">High</span>
+                    <span class="hp-clause-title">Termination</span>
                 </div>
-                <div class="clause-body">
-                    <div class="clause-block">
-                        <div class="clause-label label-original">
+                <div class="hp-clause-body">
+                    <div class="hp-clause-block">
+                        <div class="hp-clause-label hp-label-original">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             Original Clause
                         </div>
-                        <div class="clause-text">
-                            "Either party may terminate with <span class="strikethrough">thirty (30) days</span> notice."
+                        <div class="hp-clause-text">
+                            "Either party may terminate with <span class="hp-strikethrough">thirty (30) days</span> notice."
                         </div>
                     </div>
-                    <div class="clause-block">
-                        <div class="clause-label label-suggested">
+                    <div class="hp-clause-block">
+                        <div class="hp-clause-label hp-label-suggested">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                             Suggested Redline
                         </div>
-                        <div class="clause-text suggested">
-                            "Either party may terminate with <span class="highlight">sixty (60) days written notice</span>. <span class="addition">Customer may terminate for convenience with 30 days notice.</span>"
+                        <div class="hp-clause-text hp-suggested">
+                            "Either party may terminate with <span class="hp-highlight">sixty (60) days written notice</span>. <span class="hp-addition">Customer may terminate for convenience with 30 days notice.</span>"
                         </div>
                     </div>
                 </div>
@@ -125,26 +129,26 @@
 </section>
 
 <!-- How It Works -->
-<section class="how-it-works" id="how-it-works">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-label">How It Works</span>
+<section class="hp-how-it-works" id="how-it-works">
+    <div class="hp-container">
+        <div class="hp-section-header">
+            <span class="hp-section-label">How It Works</span>
             <h2>From Upload to Redline in Three Steps</h2>
             <p>Our AI agent handles the heavy lifting so you can focus on what matters — closing deals faster and safer.</p>
         </div>
-        <div class="steps-grid">
-            <div class="step-card">
-                <div class="step-number">1</div>
+        <div class="hp-steps-grid">
+            <div class="hp-step-card">
+                <div class="hp-step-number">1</div>
                 <h3>Upload</h3>
                 <p>Drop your PDF or paste contract text. We handle NDAs, MSAs, SaaS agreements, and more.</p>
             </div>
-            <div class="step-card">
-                <div class="step-number">2</div>
+            <div class="hp-step-card">
+                <div class="hp-step-number">2</div>
                 <h3>Analyze</h3>
                 <p>Gemini 2.5 Pro scans every clause, identifies risks, and scores the contract 0–100.</p>
             </div>
-            <div class="step-card">
-                <div class="step-number">3</div>
+            <div class="hp-step-card">
+                <div class="hp-step-number">3</div>
                 <h3>Negotiate</h3>
                 <p>Get redlined suggestions for every risky clause. Copy, edit, and send to counterparty.</p>
             </div>
@@ -153,34 +157,34 @@
 </section>
 
 <!-- Stats -->
-<div class="stats-section">
-    <div class="stats-grid">
-        <div class="stat-item">
-            <div class="stat-number">1,302</div>
-            <div class="stat-label">Contracts Analyzed</div>
+<div class="hp-stats-section">
+    <div class="hp-stats-grid">
+        <div class="hp-stat-item">
+            <div class="hp-stat-number">1,302</div>
+            <div class="hp-stat-label">Contracts Analyzed</div>
         </div>
-        <div class="stat-item">
-            <div class="stat-number">&lt;2 min</div>
-            <div class="stat-label">Average Analysis Time</div>
+        <div class="hp-stat-item">
+            <div class="hp-stat-number">&lt;2 min</div>
+            <div class="hp-stat-label">Average Analysis Time</div>
         </div>
-        <div class="stat-item">
-            <div class="stat-number">95%</div>
-            <div class="stat-label">Risk Detection Accuracy</div>
+        <div class="hp-stat-item">
+            <div class="hp-stat-number">95%</div>
+            <div class="hp-stat-label">Risk Detection Accuracy</div>
         </div>
     </div>
 </div>
 
 <!-- Security -->
-<section class="security-section" id="security">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-label">Enterprise-Grade Security</span>
+<section class="hp-security-section" id="security">
+    <div class="hp-container">
+        <div class="hp-section-header">
+            <span class="hp-section-label">Enterprise-Grade Security</span>
             <h2>Your Contracts Are Sensitive. We Built Security In From Day One.</h2>
             <p>We treat your legal documents with the same care you do. Every layer of our infrastructure is designed to protect your data.</p>
         </div>
-        <div class="security-grid">
-            <div class="security-card">
-                <div class="security-icon">
+        <div class="hp-security-grid">
+            <div class="hp-security-card">
+                <div class="hp-security-icon">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                         <path d="M7 11V7a5 5 0 0110 0v4"/>
@@ -189,8 +193,8 @@
                 <h3>TLS 1.3 Encryption</h3>
                 <p>All data in transit encrypted with the latest standard. Your contracts are unreadable to anyone but you.</p>
             </div>
-            <div class="security-card">
-                <div class="security-icon">
+            <div class="hp-security-card">
+                <div class="hp-security-icon">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"/>
                         <path d="M2 12h20"/>
@@ -200,8 +204,8 @@
                 <h3>EU Data Hosting</h3>
                 <p>All data stored in Frankfurt, Germany. Fully GDPR compliant. Your contracts never leave the EU.</p>
             </div>
-            <div class="security-card">
-                <div class="security-icon">
+            <div class="hp-security-card">
+                <div class="hp-security-icon">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
                         <polyline points="14 2 14 8 20 8"/>
@@ -213,8 +217,8 @@
                 <h3>SOC 2 Aligned</h3>
                 <p>Security controls following AICPA Trust Criteria. Regular audits ensure we meet enterprise standards.</p>
             </div>
-            <div class="security-card">
-                <div class="security-icon">
+            <div class="hp-security-card">
+                <div class="hp-security-icon">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
                     </svg>
@@ -227,39 +231,39 @@
 </section>
 
 <!-- Use Cases -->
-<section class="usecases-section" id="use-cases">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-label">Built For Your Team</span>
+<section class="hp-usecases-section" id="use-cases">
+    <div class="hp-container">
+        <div class="hp-section-header">
+            <span class="hp-section-label">Built For Your Team</span>
             <h2>Who Uses ContractPilot?</h2>
             <p>Whether you're a solo founder or part of a 50-person legal team, our AI agent adapts to your workflow.</p>
         </div>
-        <div class="usecases-grid">
-            <div class="usecase-card">
-                <div class="usecase-icon">⚖️</div>
+        <div class="hp-usecases-grid">
+            <div class="hp-usecase-card">
+                <div class="hp-usecase-icon">⚖️</div>
                 <h3>In-House Counsel</h3>
                 <p>Stop drowning in routine contract reviews. Let the AI handle first-pass analysis so you can focus on high-stakes negotiations.</p>
-                <ul class="usecase-benefits">
+                <ul class="hp-usecase-benefits">
                     <li>Cut review time by 80%</li>
                     <li>Standardize risk scoring across the team</li>
                     <li>Never miss a hidden liability clause</li>
                 </ul>
             </div>
-            <div class="usecase-card">
-                <div class="usecase-icon">🚀</div>
+            <div class="hp-usecase-card">
+                <div class="hp-usecase-icon">🚀</div>
                 <h3>Startup Founders</h3>
                 <p>You don't have a legal team yet. ContractPilot gives you senior-level contract review without the $800/hour price tag.</p>
-                <ul class="usecase-benefits">
+                <ul class="hp-usecase-benefits">
                     <li>Review investor term sheets instantly</li>
                     <li>Spot unfair SaaS vendor terms</li>
                     <li>Free your first analysis, no strings</li>
                 </ul>
             </div>
-            <div class="usecase-card">
-                <div class="usecase-icon">📋</div>
+            <div class="hp-usecase-card">
+                <div class="hp-usecase-icon">📋</div>
                 <h3>Ops Managers</h3>
                 <p>Close vendor agreements faster. Get redlined suggestions you can send directly to procurement — no legal degree required.</p>
-                <ul class="usecase-benefits">
+                <ul class="hp-usecase-benefits">
                     <li>Accelerate vendor onboarding</li>
                     <li>Reduce back-and-forth with legal</li>
                     <li>Maintain compliance standards</li>
@@ -270,56 +274,56 @@
 </section>
 
 <!-- FAQ -->
-<section id="faq">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-label">FAQ</span>
+<section class="hp-faq-section" id="faq">
+    <div class="hp-container">
+        <div class="hp-section-header">
+            <span class="hp-section-label">FAQ</span>
             <h2>Common Questions</h2>
             <p>Everything you need to know before uploading your first contract.</p>
         </div>
-        <div class="faq-list">
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
+        <div class="hp-faq-list">
+            <div class="hp-faq-item">
+                <div class="hp-faq-question" onclick="toggleFaq(this)">
                     How accurate is the AI analysis?
-                    <span class="faq-toggle">+</span>
+                    <span class="hp-faq-toggle">+</span>
                 </div>
-                <div class="faq-answer">
+                <div class="hp-faq-answer">
                     <p>Our AI is powered by Gemini 2.5 Pro and trained on thousands of real-world contracts. It achieves 95% accuracy in risk detection and provides redlines based on industry-standard legal precedents. However, we always recommend having a qualified attorney review critical contracts before signing.</p>
                 </div>
             </div>
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="hp-faq-item">
+                <div class="hp-faq-question" onclick="toggleFaq(this)">
                     Where is my contract data stored?
-                    <span class="faq-toggle">+</span>
+                    <span class="hp-faq-toggle">+</span>
                 </div>
-                <div class="faq-answer">
+                <div class="hp-faq-answer">
                     <p>All data is stored exclusively in Frankfurt, Germany, within the European Union. We are fully GDPR compliant, use TLS 1.3 encryption for all data in transit, and follow SOC 2 aligned security controls. Your contracts never leave the EU, and we never use your data to train our models.</p>
                 </div>
             </div>
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="hp-faq-item">
+                <div class="hp-faq-question" onclick="toggleFaq(this)">
                     How are redlines generated?
-                    <span class="faq-toggle">+</span>
+                    <span class="hp-faq-toggle">+</span>
                 </div>
-                <div class="faq-answer">
+                <div class="hp-faq-answer">
                     <p>Redlines are generated by comparing your clause against millions of analyzed contracts and legal precedents. The AI identifies deviations from market-standard terms and suggests language that better protects your position — similar to what a senior attorney would recommend.</p>
                 </div>
             </div>
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="hp-faq-item">
+                <div class="hp-faq-question" onclick="toggleFaq(this)">
                     What types of contracts can I upload?
-                    <span class="faq-toggle">+</span>
+                    <span class="hp-faq-toggle">+</span>
                 </div>
-                <div class="faq-answer">
+                <div class="hp-faq-answer">
                     <p>We support NDAs, MSAs, SaaS agreements, employment contracts, vendor agreements, licensing deals, and more. You can upload PDFs, Word documents, or paste plain text. Our AI handles both structured and unstructured contract formats.</p>
                 </div>
             </div>
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
+            <div class="hp-faq-item">
+                <div class="hp-faq-question" onclick="toggleFaq(this)">
                     Is there really no credit card required?
-                    <span class="faq-toggle">+</span>
+                    <span class="hp-faq-toggle">+</span>
                 </div>
-                <div class="faq-answer">
+                <div class="hp-faq-answer">
                     <p>Absolutely. Your first contract analysis is completely free with no credit card required. We want you to experience the value before making any commitment. After your free analysis, you can choose a plan that fits your volume.</p>
                 </div>
             </div>
@@ -328,9 +332,9 @@
 </section>
 
 <!-- CTA -->
-<section class="cta-section">
-    <div class="cta-bg"></div>
-    <div class="cta-content">
+<section class="hp-cta-section">
+    <div class="hp-cta-bg"></div>
+    <div class="hp-cta-content">
         <h2>Ready to Review Contracts in Minutes?</h2>
         <p>Join hundreds of legal teams and founders who've already cut their contract review time by 80%.</p>
         <a href="/register" class="btn btn-primary">Start your free analysis</a>
@@ -340,9 +344,8 @@
 <script>
 function toggleFaq(element) {
     const item = element.parentElement;
-    const isActive = item.classList.contains('active');
-    document.querySelectorAll('.faq-item').forEach(faq => faq.classList.remove('active'));
-    if (!isActive) item.classList.add('active');
+    const isActive = item.classList.contains('hp-active');
+    document.querySelectorAll('.hp-faq-item').forEach(faq => faq.classList.remove('hp-active'));
+    if (!isActive) item.classList.add('hp-active');
 }
 </script>
-{% endblock %}
