@@ -170,12 +170,30 @@ async def dashboard_data(current_user: User = Depends(get_current_user), db: Ses
 # CONTRACT UPLOAD & ANALYSIS API
 # ═══════════════════════════════════════════════════════════════
 
-@app.post("/api/contracts/upload")
-async def upload_contract(
+# Primary endpoint (matches frontend)
+@app.post("/api/contracts/analyze")
+async def analyze_contract_endpoint(
     file: UploadFile = File(...),
+    title: str = Form(""),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    """Upload and analyze a contract. Returns analysis results."""
+    return await _process_contract_upload(file, title, current_user, db)
+
+# Alias endpoint (alternative URL)
+@app.post("/api/contracts/upload")
+async def upload_contract_endpoint(
+    file: UploadFile = File(...),
+    title: str = Form(""),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Alias for /api/contracts/analyze."""
+    return await _process_contract_upload(file, title, current_user, db)
+
+async def _process_contract_upload(file, title, current_user, db):
+    """Shared logic for contract upload and analysis."""
     # Read file content
     content = await file.read()
 
@@ -194,34 +212,43 @@ async def upload_contract(
     # Save contract to DB
     contract = Contract(
         owner_id=current_user.id,
+        title=title or file.filename,
         filename=file.filename,
         original_text=text,
-        risk_score=0
+        risk_score=0,
+        status="analyzing"
     )
     db.add(contract)
     db.commit()
     db.refresh(contract)
 
     # Run AI analysis
-    analysis = analyze_contract(text)
+    try:
+        analysis = analyze_contract(text)
 
-    # Update contract with risk score
-    contract.risk_score = analysis.get("risk_score", 0)
-    db.commit()
+        # Update contract with risk score
+        contract.risk_score = analysis.get("risk_score", 0)
+        contract.status = "completed"
+        db.commit()
 
-    # Save clauses
-    for clause_data in analysis.get("clauses", []):
-        clause = Clause(
-            contract_id=contract.id,
-            clause_type=clause_data.get("type", "general"),
-            original_text=clause_data.get("original_text", ""),
-            risk_level=clause_data.get("risk_level", "low"),
-            explanation=clause_data.get("explanation", ""),
-            suggested_revision=clause_data.get("suggested_revision", "")
-        )
-        db.add(clause)
+        # Save clauses
+        for clause_data in analysis.get("clauses", []):
+            clause = Clause(
+                contract_id=contract.id,
+                clause_type=clause_data.get("type", clause_data.get("title", "general")),
+                original_text=clause_data.get("original_text", ""),
+                risk_level=clause_data.get("risk_level", clause_data.get("severity", "low")).lower(),
+                explanation=clause_data.get("explanation", ""),
+                suggested_revision=clause_data.get("suggested_revision", clause_data.get("suggested_text", ""))
+            )
+            db.add(clause)
 
-    db.commit()
+        db.commit()
+    except Exception as e:
+        contract.status = "failed"
+        db.commit()
+        print(f"Analysis error: {e}")
+        # Still return the contract ID so user can see it
 
     return {"contract_id": contract.id, "redirect": f"/analysis?id={contract.id}"}
 
@@ -242,11 +269,11 @@ async def get_analysis(
     clauses = db.query(Clause).filter(Clause.contract_id == contract_id).all()
 
     return {
-        "risk_score": contract.risk_score,
+        "risk_score": contract.risk_score or 0,
         "clauses": [
             {
                 "title": c.clause_type,
-                "severity": c.risk_level.upper(),
+                "severity": c.risk_level.upper() if c.risk_level else "LOW",
                 "explanation": c.explanation,
                 "original_text": c.original_text,
                 "suggested_text": c.suggested_revision
@@ -280,6 +307,12 @@ async def create_checkout_session(current_user: User = Depends(get_current_user)
         return {"checkout_url": session.url}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Alias for pricing page button
+@app.post("/api/payments/checkout")
+async def checkout_alias(current_user: User = Depends(get_current_user)):
+    """Alias for /api/payments/create-checkout-session"""
+    return await create_checkout_session(current_user)
 
 @app.post("/api/payments/webhook")
 async def stripe_webhook(request: Request):
