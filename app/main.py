@@ -246,7 +246,7 @@ async def _process_contract_upload(file, title, current_user, db):
 
     # Run AI analysis
     try:
-        analysis = analyze_contract(text)
+        analysis = await analyze_contract(text)
         print(f"AI Analysis result: {json.dumps(analysis, indent=2)}")
 
         # Update contract with risk score
