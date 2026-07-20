@@ -112,13 +112,17 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email already registered")
 
     hashed_password = get_password_hash(user.password)
-    new_user = User(email=user.email, hashed_password=hashed_password)
+    new_user = User(
+        email=user.email,
+        hashed_password=hashed_password,
+        full_name=getattr(user, 'full_name', None)
+    )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
     token = create_access_token({"sub": new_user.email})
-    return {"access_token": token, "token_type": "bearer", "plan": new_user.plan}
+    return {"access_token": token, "token_type": "bearer", "plan": new_user.tier.value}
 
 @app.post("/api/auth/login")
 async def login(user: UserLogin, db: Session = Depends(get_db)):
@@ -127,7 +131,7 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_access_token({"sub": db_user.email})
-    return {"access_token": token, "token_type": "bearer", "plan": db_user.plan}
+    return {"access_token": token, "token_type": "bearer", "plan": db_user.tier.value}
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -136,7 +140,7 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
 
 @app.get("/api/dashboard")
 async def dashboard_data(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    contracts = db.query(Contract).filter(Contract.user_id == current_user.id).all()
+    contracts = db.query(Contract).filter(Contract.owner_id == current_user.id).all()
 
     total_contracts = len(contracts)
     monthly_analyses = len([c for c in contracts if c.created_at and c.created_at.month == datetime.now().month])
@@ -148,7 +152,7 @@ async def dashboard_data(current_user: User = Depends(get_current_user), db: Ses
         "total_contracts": total_contracts,
         "monthly_analyses": monthly_analyses,
         "avg_risk": avg_risk,
-        "plan": current_user.plan,
+        "plan": current_user.tier.value,
         "contracts": [
             {
                 "id": c.id,
@@ -189,9 +193,9 @@ async def upload_contract(
 
     # Save contract to DB
     contract = Contract(
-        user_id=current_user.id,
+        owner_id=current_user.id,
         filename=file.filename,
-        content=text,
+        original_text=text,
         risk_score=0
     )
     db.add(contract)
@@ -209,11 +213,11 @@ async def upload_contract(
     for clause_data in analysis.get("clauses", []):
         clause = Clause(
             contract_id=contract.id,
-            title=clause_data.get("title", ""),
-            severity=clause_data.get("severity", "LOW"),
-            explanation=clause_data.get("explanation", ""),
+            clause_type=clause_data.get("type", "general"),
             original_text=clause_data.get("original_text", ""),
-            suggested_text=clause_data.get("suggested_text", "")
+            risk_level=clause_data.get("risk_level", "low"),
+            explanation=clause_data.get("explanation", ""),
+            suggested_revision=clause_data.get("suggested_revision", "")
         )
         db.add(clause)
 
@@ -229,7 +233,7 @@ async def get_analysis(
 ):
     contract = db.query(Contract).filter(
         Contract.id == contract_id,
-        Contract.user_id == current_user.id
+        Contract.owner_id == current_user.id
     ).first()
 
     if not contract:
@@ -241,11 +245,11 @@ async def get_analysis(
         "risk_score": contract.risk_score,
         "clauses": [
             {
-                "title": c.title,
-                "severity": c.severity,
+                "title": c.clause_type,
+                "severity": c.risk_level.upper(),
                 "explanation": c.explanation,
                 "original_text": c.original_text,
-                "suggested_text": c.suggested_text
+                "suggested_text": c.suggested_revision
             }
             for c in clauses
         ]
@@ -293,7 +297,6 @@ async def stripe_webhook(request: Request):
                 payload, sig_header, webhook_secret
             )
         else:
-            # Fallback: parse without verification (NOT for production)
             event = json.loads(payload)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid payload")
@@ -302,14 +305,11 @@ async def stripe_webhook(request: Request):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    # Handle the event
     event_type = event.get("type", "")
 
     if event_type == "checkout.session.completed":
         session = event["data"]["object"]
         print(f"Payment successful for session: {session.get('id')}")
-        # TODO: Update user plan to "pro" in database
-        # user_id = session.get("client_reference_id")
 
     elif event_type == "invoice.payment_succeeded":
         invoice = event["data"]["object"]
@@ -322,6 +322,5 @@ async def stripe_webhook(request: Request):
     elif event_type == "customer.subscription.deleted":
         subscription = event["data"]["object"]
         print(f"Subscription cancelled: {subscription.get('id')}")
-        # TODO: Downgrade user to free plan
 
     return {"status": "success", "event": event_type}
