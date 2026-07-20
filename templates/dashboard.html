@@ -31,7 +31,7 @@
         </a>
     </nav>
     <div class="sidebar-footer">
-        <a href="#" onclick="logout()" class="nav-item">
+        <a href="#" onclick="logout(); return false;" class="nav-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Logout
         </a>
@@ -43,7 +43,7 @@
     <div class="dashboard-header">
         <div>
             <h1>Dashboard</h1>
-            <p style="color: var(--slate-500); margin-top: 0.25rem;">Manage your contracts and analyses</p>
+            <p style="color: #64748b; margin-top: 0.25rem;">Manage your contracts and analyses</p>
         </div>
         <a href="/upload" class="btn btn-primary">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -55,28 +55,28 @@
         <div class="stat-card">
             <div class="stat-header">
                 <span class="stat-label">Total Contracts</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--slate-600);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #475569;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             </div>
             <div class="stat-value" id="statTotal">0</div>
         </div>
         <div class="stat-card">
             <div class="stat-header">
                 <span class="stat-label">Analyses This Month</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--slate-600);"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #475569;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             </div>
             <div class="stat-value" id="statMonth">0</div>
         </div>
         <div class="stat-card">
             <div class="stat-header">
                 <span class="stat-label">Avg. Risk Score</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--slate-600);"><circle cx="12" cy="12" r="10"/><path d="M16.2 7.8l-2 6.3l-6.4 2.1l2-6.3z"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #475569;"><circle cx="12" cy="12" r="10"/><path d="M16.2 7.8l-2 6.3l-6.4 2.1l2-6.3z"/></svg>
             </div>
             <div class="stat-value" id="statRisk">--</div>
         </div>
         <div class="stat-card">
             <div class="stat-header">
                 <span class="stat-label">Plan</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--slate-600);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #475569;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             </div>
             <div class="stat-value" id="statPlan">Free</div>
         </div>
@@ -89,7 +89,7 @@
         </div>
         <div class="contracts-list" id="contractsList">
             <div class="contract-row empty-state" id="emptyState">
-                <p style="color: var(--slate-500);">No contracts yet. <a href="/upload" style="color: var(--primary);">Upload your first one</a>.</p>
+                <p style="color: #64748b;">No contracts yet. <a href="/upload" style="color: #6366f1;">Upload your first one</a>.</p>
             </div>
         </div>
     </div>
@@ -98,7 +98,7 @@
 
 {% block footer %}{% endblock %}
 
-{% block scripts %}
+{% block extra_js %}
 <script>
 async function loadDashboard() {
     const token = localStorage.getItem("token");
@@ -128,22 +128,22 @@ async function loadDashboard() {
 
             const list = document.getElementById("contractsList");
             list.innerHTML = contracts.map(function(c) {
-                return "<div class="contract-row">" +
-                    "<div class="contract-info">" +
-                        "<h4>" + c.title + "</h4>" +
-                        "<p>" + new Date(c.created_at).toLocaleDateString() + " · Risk: " + (c.risk_score || "N/A") + "</p>" +
-                    "</div>" +
-                    "<div class="contract-actions">" +
-                        "<a href="/analysis/" + c.id + "" class="btn btn-sm btn-secondary">View</a>" +
-                    "</div>" +
-                "</div>";
+                return '<div class="contract-row">' +
+                    '<div class="contract-info">' +
+                        '<h4>' + c.title + '</h4>' +
+                        '<p>' + new Date(c.created_at).toLocaleDateString() + ' &middot; Risk: ' + (c.risk_score || "N/A") + '</p>' +
+                    '</div>' +
+                    '<div class="contract-actions">' +
+                        '<a href="/analysis/' + c.id + '" class="btn btn-sm btn-secondary">View</a>' +
+                    '</div>' +
+                '</div>';
             }).join("");
         }
     } catch (err) {
         document.getElementById("contractsList").innerHTML =
-            "<div class="contract-row empty-state">" +
-                "<p style="color: var(--danger);">Error loading data. <a href="#" onclick="location.reload()" style="color: var(--primary);">Retry</a></p>" +
-            "</div>";
+            '<div class="contract-row empty-state">' +
+                '<p style="color: #ef4444;">Error loading data. <a href="#" onclick="location.reload()" style="color: #6366f1;">Retry</a></p>' +
+            '</div>';
     }
 }
 
