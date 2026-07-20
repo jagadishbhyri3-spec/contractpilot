@@ -1,12 +1,11 @@
 {% extends "base.html" %}
-
-{% block title %}Analysis | ContractPilot{% endblock %}
+{% block body_class %}has-sidebar{% endblock %}
+{% block title %}Analysis — ContractPilot{% endblock %}
 
 {% block navbar %}{% endblock %}
-{% block footer %}{% endblock %}
 
 {% block content %}
-<!-- Sidebar Navigation -->
+<!-- Sidebar -->
 <aside class="sidebar">
     <div class="sidebar-brand">
         <a href="/">
@@ -19,301 +18,214 @@
     </div>
     <nav class="sidebar-nav">
         <a href="/dashboard" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             Dashboard
         </a>
         <a href="/upload" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Upload
         </a>
         <a href="/analysis" class="nav-item active">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             Analysis
         </a>
         <a href="/pricing" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="1" x2="12" y2="23"></line>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             Pricing
         </a>
     </nav>
     <div class="sidebar-footer">
-        <a href="#" id="navLogout" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
+        <a href="#" onclick="logout(); return false;" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Logout
         </a>
     </div>
 </aside>
 
 <!-- Main Content -->
-<main class="dashboard-main">
-    <header class="dashboard-header">
+<div class="dashboard-main">
+    <div class="dashboard-header">
         <div>
             <h1>Contract Analysis</h1>
-            <p class="text-muted">AI-powered risk assessment and redlined suggestions</p>
+            <p style="color: #64748b; margin-top: 0.25rem;">AI-powered risk assessment and redlined suggestions</p>
         </div>
         <a href="/upload" class="btn btn-primary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             New Analysis
         </a>
-    </header>
-
-    <!-- Loading State -->
-    <div id="analysis-loading" class="analysis-loading">
-        <div class="spinner"></div>
-        <p style="font-size: 1.1rem; font-weight: 500; color: var(--slate-200, #e2e8f0);">Analyzing contract with Gemini 2.5 Pro...</p>
-        <span class="text-muted">This usually takes 30-60 seconds</span>
     </div>
 
-    <!-- Results Container -->
-    <div id="analysis-results" class="analysis-results" style="display: none;">
+    <div id="loadingState" class="analysis-loading">
+        <div class="spinner"></div>
+        <p>Analyzing your contract...</p>
+    </div>
 
-        <!-- Risk Score + Stats Cards -->
+    <div id="errorState" class="analysis-error" style="display:none;">
+        <div class="error-icon">✕</div>
+        <h3>Analysis Failed</h3>
+        <p id="errorMessage">Could not load analysis results.</p>
+        <a href="/upload" class="btn btn-primary">Try Again</a>
+    </div>
+
+    <div id="resultsState" style="display:none;">
         <div class="stats-grid">
-            <div class="stat-card" style="text-align: center;">
-                <div class="stat-header" style="justify-content: center;">
+            <div class="stat-card">
+                <div class="stat-header">
                     <span class="stat-label">Risk Score</span>
-                    <span id="risk-badge" class="risk-badge">--</span>
+                    <span id="riskBadge" class="risk-badge">--</span>
                 </div>
                 <div class="risk-ring-container">
                     <svg class="risk-ring" viewBox="0 0 120 120">
                         <circle class="risk-ring-bg" cx="60" cy="60" r="54"/>
-                        <circle id="risk-ring-progress" class="risk-ring-progress" cx="60" cy="60" r="54"/>
+                        <circle id="riskProgress" class="risk-ring-progress" cx="60" cy="60" r="54"/>
                     </svg>
-                    <div class="risk-score" id="risk-score">--</div>
+                    <div class="risk-score" id="riskScore">--</div>
                 </div>
             </div>
-
             <div class="stat-card">
                 <div class="stat-header">
                     <span class="stat-label">Clauses Analyzed</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                    </svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #475569;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 </div>
-                <div class="stat-value" id="clause-count">--</div>
+                <div class="stat-value" id="clauseCount">0</div>
             </div>
-
             <div class="stat-card">
                 <div class="stat-header">
                     <span class="stat-label">Critical Risks</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-danger">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                        <line x1="12" y1="9" x2="12" y2="13"></line>
-                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #ef4444;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 </div>
-                <div class="stat-value text-danger" id="critical-count">--</div>
+                <div class="stat-value" id="criticalCount" style="color: #ef4444;">0</div>
             </div>
-
             <div class="stat-card">
                 <div class="stat-header">
                     <span class="stat-label">High Risks</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-warning">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                        <line x1="12" y1="9" x2="12" y2="13"></line>
-                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #f59e0b;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 </div>
-                <div class="stat-value text-warning" id="high-count">--</div>
+                <div class="stat-value" id="highCount" style="color: #f59e0b;">0</div>
             </div>
         </div>
 
-        <!-- Flagged Clauses -->
         <div class="contracts-section">
             <div class="contracts-header">
                 <h2>Flagged Clauses</h2>
-                <span id="flagged-count" class="text-muted">0 issues found</span>
+                <span id="issuesFound">0 issues found</span>
             </div>
-            <div id="clauses-list" class="contracts-list">
-                <!-- Populated by JS -->
+            <div id="clausesList" class="contracts-list">
+                <!-- Clauses will be inserted here -->
             </div>
         </div>
 
-        <!-- Action Buttons -->
         <div class="analysis-actions">
             <a href="/upload" class="btn btn-primary">Analyze Another Contract</a>
             <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
         </div>
     </div>
-
-    <!-- Error State -->
-    <div id="analysis-error" style="display: none; text-align: center; padding: 4rem 2rem;">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="margin-bottom: 1rem;">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="15" y1="9" x2="9" y2="15"></line>
-            <line x1="9" y1="9" x2="15" y2="15"></line>
-        </svg>
-        <p style="color: #ef4444; font-weight: 500; margin-bottom: 0.5rem;">Analysis Failed</p>
-        <p class="text-muted" id="error-message">Something went wrong.</p>
-        <a href="/upload" class="btn btn-primary" style="margin-top: 1rem;">Try Again</a>
-    </div>
-</main>
+</div>
 {% endblock %}
+
+{% block footer %}{% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+function getContractId() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('id') || window.location.pathname.split('/').pop();
+}
+
+async function loadAnalysis() {
     const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = '/login';
+    if (!token) { window.location.href = '/login'; return; }
+
+    const contractId = getContractId();
+    if (!contractId || contractId === 'analysis') {
+        showError('No contract ID provided. Upload a contract to analyze it.');
         return;
     }
 
-    // Logout handler
-    const navLogout = document.getElementById('navLogout');
-    if (navLogout) {
-        navLogout.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('token');
-            window.location.href = '/';
-        });
-    }
-
-    // Get contract ID from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const contractId = urlParams.get('id');
-
-    if (contractId) {
-        fetchAnalysis(contractId, token);
-    } else {
-        showError('No contract ID provided. Upload a contract to analyze it.');
-    }
-});
-
-async function fetchAnalysis(contractId, token) {
     try {
-        const response = await fetch(`/api/contracts/${contractId}/analysis`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const res = await fetch('/api/contracts/' + contractId + '/analysis', {
+            headers: { 'Authorization': 'Bearer ' + token }
         });
 
-        if (!response.ok) {
-            if (response.status === 401) {
-                localStorage.removeItem('token');
-                window.location.href = '/login';
-                return;
+        if (!res.ok) {
+            if (res.status === 404) {
+                showError('Contract not found.');
+            } else {
+                showError('Failed to load analysis. Please try again.');
             }
-            const err = await response.json().catch(() => ({}));
-            throw new Error(err.detail || `Analysis failed (${response.status})`);
+            return;
         }
 
-        const data = await response.json();
-        renderAnalysis(data);
+        const data = await res.json();
+        displayResults(data);
     } catch (err) {
-        showError(err.message);
+        showError('Network error. Please check your connection.');
     }
-}
-
-function renderAnalysis(data) {
-    document.getElementById('analysis-loading').style.display = 'none';
-    document.getElementById('analysis-results').style.display = 'block';
-
-    // Risk score
-    const score = data.risk_score || 0;
-    document.getElementById('risk-score').textContent = score;
-
-    const ring = document.getElementById('risk-ring-progress');
-    const circumference = 2 * Math.PI * 54;
-    const offset = circumference - (score / 100) * circumference;
-
-    setTimeout(() => {
-        ring.style.strokeDashoffset = offset;
-    }, 100);
-
-    let color = '#22c55e';
-    let badge = 'LOW';
-    if (score > 70) { color = '#ef4444'; badge = 'CRITICAL'; }
-    else if (score > 40) { color = '#f59e0b'; badge = 'HIGH'; }
-    else if (score > 20) { color = '#3b82f6'; badge = 'MEDIUM'; }
-
-    ring.style.stroke = color;
-    const badgeEl = document.getElementById('risk-badge');
-    badgeEl.textContent = badge;
-    badgeEl.style.background = color + '20';
-    badgeEl.style.color = color;
-
-    const clauses = data.clauses || [];
-    document.getElementById('clause-count').textContent = clauses.length;
-    document.getElementById('critical-count').textContent = 
-        clauses.filter(c => c.severity === 'CRITICAL').length;
-    document.getElementById('high-count').textContent = 
-        clauses.filter(c => c.severity === 'HIGH').length;
-    document.getElementById('flagged-count').textContent = 
-        `${clauses.length} issue${clauses.length !== 1 ? 's' : ''} found`;
-
-    const list = document.getElementById('clauses-list');
-
-    if (clauses.length === 0) {
-        list.innerHTML = `
-            <div class="contract-row empty-state">
-                <p class="text-muted">No risks detected. This contract looks clean!</p>
-            </div>`;
-        return;
-    }
-
-    list.innerHTML = clauses.map((clause, idx) => `
-        <div class="contract-row" style="position: relative;">
-            <span class="severity-badge severity-${(clause.severity || 'LOW').toLowerCase()}">${clause.severity || 'LOW'}</span>
-            <div class="contract-info" style="padding-right: 80px;">
-                <h4>${escapeHtml(clause.title || 'Unnamed Clause')}</h4>
-                <p class="text-muted">${escapeHtml(clause.explanation || 'No explanation provided.')}</p>
-            </div>
-            <div class="contract-actions">
-                <button class="btn btn-sm btn-outline" onclick="toggleSuggestion(${idx})">View Suggestion</button>
-            </div>
-            <div id="suggestion-${idx}" class="suggestion-panel" style="display: none;">
-                <p><strong>Original:</strong></p>
-                <p style="font-style: italic; color: var(--slate-400);">"${escapeHtml(clause.original_text || 'N/A')}"</p>
-                <hr style="border: none; border-top: 1px solid var(--slate-700); margin: 1rem 0;">
-                <p><strong>Suggested Revision:</strong></p>
-                <p style="color: #22c55e; font-weight: 500;">"${escapeHtml(clause.suggested_text || 'No suggestion available.')}"</p>
-            </div>
-        </div>
-    `).join('');
-}
-
-function toggleSuggestion(idx) {
-    const panel = document.getElementById(`suggestion-${idx}`);
-    const btn = panel.previousElementSibling.querySelector('button');
-    const isHidden = panel.style.display === 'none';
-    panel.style.display = isHidden ? 'block' : 'none';
-    btn.textContent = isHidden ? 'Hide Suggestion' : 'View Suggestion';
 }
 
 function showError(message) {
-    document.getElementById('analysis-loading').style.display = 'none';
-    document.getElementById('analysis-results').style.display = 'none';
-    const errDiv = document.getElementById('analysis-error');
-    errDiv.style.display = 'block';
-    document.getElementById('error-message').textContent = message;
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('resultsState').style.display = 'none';
+    document.getElementById('errorState').style.display = 'flex';
+    document.getElementById('errorMessage').textContent = message;
 }
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+function displayResults(data) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorState').style.display = 'none';
+    document.getElementById('resultsState').style.display = 'block';
+
+    const score = data.risk_score || 0;
+    document.getElementById('riskScore').textContent = Math.round(score);
+    
+    const badge = document.getElementById('riskBadge');
+    if (score >= 70) { badge.textContent = 'CRITICAL'; badge.style.background = 'rgba(239,68,68,0.15)'; badge.style.color = '#ef4444'; }
+    else if (score >= 50) { badge.textContent = 'HIGH'; badge.style.background = 'rgba(245,158,11,0.15)'; badge.style.color = '#f59e0b'; }
+    else if (score >= 30) { badge.textContent = 'MEDIUM'; badge.style.background = 'rgba(59,130,246,0.15)'; badge.style.color = '#3b82f6'; }
+    else { badge.textContent = 'LOW'; badge.style.background = 'rgba(34,197,94,0.15)'; badge.style.color = '#22c55e'; }
+
+    const progress = document.getElementById('riskProgress');
+    const circumference = 2 * Math.PI * 54;
+    progress.style.strokeDasharray = circumference;
+    progress.style.strokeDashoffset = circumference - (score / 100) * circumference;
+    progress.style.stroke = score >= 70 ? '#ef4444' : score >= 50 ? '#f59e0b' : score >= 30 ? '#3b82f6' : '#22c55e';
+
+    const clauses = data.clauses || [];
+    document.getElementById('clauseCount').textContent = clauses.length;
+    document.getElementById('criticalCount').textContent = clauses.filter(c => (c.severity || c.risk_level || '').toLowerCase() === 'critical').length;
+    document.getElementById('highCount').textContent = clauses.filter(c => (c.severity || c.risk_level || '').toLowerCase() === 'high').length;
+    document.getElementById('issuesFound').textContent = clauses.length + ' issues found';
+
+    const list = document.getElementById('clausesList');
+    if (clauses.length === 0) {
+        list.innerHTML = '<div class="contract-row empty-state"><p style="color: #64748b;">No risks detected. This contract looks clean!</p></div>';
+        return;
+    }
+
+    list.innerHTML = clauses.map(function(c) {
+        const severity = (c.severity || c.risk_level || 'low').toLowerCase();
+        const severityColor = severity === 'critical' ? '#ef4444' : severity === 'high' ? '#f59e0b' : severity === 'medium' ? '#3b82f6' : '#22c55e';
+        const severityBg = severity === 'critical' ? 'rgba(239,68,68,0.15)' : severity === 'high' ? 'rgba(245,158,11,0.15)' : severity === 'medium' ? 'rgba(59,130,246,0.15)' : 'rgba(34,197,94,0.15)';
+        
+        return '<div class="contract-row" style="flex-direction: column; align-items: flex-start; gap: 1rem;">' +
+            '<div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">' +
+                '<h4 style="color: #f1f5f9; font-size: 1rem;">' + (c.title || c.clause_type || 'Unknown Clause') + '</h4>' +
+                '<span style="padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; background: ' + severityBg + '; color: ' + severityColor + ';">' + severity + '</span>' +
+            '</div>' +
+            '<p style="color: #94a3b8; font-size: 0.9rem; line-height: 1.6;">' + (c.explanation || 'No explanation provided.') + '</p>' +
+            '<div style="width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 1rem;">' +
+                '<div style="color: #64748b; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">Suggested Revision</div>' +
+                '<p style="color: #a5b4fc; font-size: 0.9rem; line-height: 1.6;">' + (c.suggested_text || c.suggested_revision || 'No suggestion provided.') + '</p>' +
+            '</div>' +
+        '</div>';
+    }).join('');
 }
+
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/';
+}
+
+loadAnalysis();
 </script>
 {% endblock %}
