@@ -49,8 +49,9 @@
         }, true);
     })();
     </script>
+<base target="_blank">
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
     {% block navbar %}
     <nav class="navbar">
         <div class="nav-brand">
