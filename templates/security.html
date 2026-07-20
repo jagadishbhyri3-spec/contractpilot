@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Security — ContractPilot{% endblock %}
+{% block content %}
+<div class="legal-page">
+    <div class="legal-container">
+        <h1>Security</h1>
+        <p class="legal-lead">We take security seriously. Here's how we protect your data.</p>
+
+        <section>
+            <h2>Encryption</h2>
+            <p>All data in transit uses TLS 1.3 encryption. Passwords are hashed using bcrypt with adaptive cost factors.</p>
+        </section>
+
+        <section>
+            <h2>Data Hosting</h2>
+            <p>All data is stored in Frankfurt, Germany, within the EU. We are fully GDPR compliant.</p>
+        </section>
+
+        <section>
+            <h2>No AI Training</h2>
+            <p>We never use your contract data to train AI models. Your documents are processed for analysis only and remain confidential.</p>
+        </section>
+
+        <section>
+            <h2>Report a Vulnerability</h2>
+            <p>Found a security issue? Contact <a href="mailto:security@contractpilot.co">security@contractpilot.co</a>.</p>
+        </section>
+    </div>
+</div>
+{% endblock %}

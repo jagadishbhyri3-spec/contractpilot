@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Pricing — ContractPilot{% endblock %}
+{% block content %}
+<div class="pricing-container">
+    <h1>Simple, Transparent Pricing</h1>
+    <p class="subtitle">Start free, upgrade when you need more.</p>
+
+    <div class="pricing-grid">
+        <div class="pricing-card">
+            <h3>Free</h3>
+            <div class="price">$0<span>/month</span></div>
+            <ul class="pricing-features">
+                <li>1 contract analysis</li>
+                <li>Basic risk scoring</li>
+                <li>Clause identification</li>
+                <li>Email support</li>
+            </ul>
+            <a href="/register" class="btn btn-outline btn-full">Get Started</a>
+        </div>
+
+        <div class="pricing-card featured">
+            <span class="badge">Most Popular</span>
+            <h3>Pro</h3>
+            <div class="price">$29<span>/month</span></div>
+            <ul class="pricing-features">
+                <li>Unlimited contract analyses</li>
+                <li>Advanced risk scoring</li>
+                <li>Redlined suggestions</li>
+                <li>Priority support</li>
+                <li>Export to PDF</li>
+            </ul>
+            <button class="btn btn-primary btn-full" onclick="checkout()">Upgrade to Pro</button>
+        </div>
+    </div>
+</div>
+
+<script>
+async function checkout() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+        return;
+    }
+    try {
+        const res = await fetch('/api/payments/create-checkout-session', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (data.checkout_url) {
+            window.location.href = data.checkout_url;
+        } else {
+            alert('Payment setup failed. Please try again.');
+        }
+    } catch (err) {
+        alert('Network error. Please try again.');
+    }
+}
+</script>
+{% endblock %}
