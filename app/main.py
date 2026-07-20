@@ -57,8 +57,8 @@ async def upload_page(request: Request):
     return templates.TemplateResponse("upload.html", {"request": request})
 
 @app.get("/analysis/{contract_id}", response_class=HTMLResponse)
-async def analysis_page(request: Request, contract_id: int):
-    """Render the contract analysis page with sidebar navigation."""
+async def analysis_page_id(request: Request, contract_id: int):
+    """Render the contract analysis page with ID in path."""
     return templates.TemplateResponse("analysis.html", {"request": request, "contract_id": contract_id})
 
 @app.get("/analysis", response_class=HTMLResponse)
@@ -247,14 +247,19 @@ async def _process_contract_upload(file, title, current_user, db):
     # Run AI analysis
     try:
         analysis = analyze_contract(text)
+        print(f"AI Analysis result: {json.dumps(analysis, indent=2)}")
 
         # Update contract with risk score
         contract.risk_score = analysis.get("overall_risk_score", 0)
         contract.status = "completed"
         db.commit()
 
-        # Save clauses
-        for clause_data in analysis.get("clauses", []):
+        # Save clauses - handle both old and new field names
+        clauses_data = analysis.get("clauses", [])
+        print(f"Number of clauses found: {len(clauses_data)}")
+
+        for clause_data in clauses_data:
+            print(f"Saving clause: {clause_data}")
             clause = Clause(
                 contract_id=contract.id,
                 clause_type=clause_data.get("clause_type", clause_data.get("type", "general")),
@@ -266,11 +271,13 @@ async def _process_contract_upload(file, title, current_user, db):
             db.add(clause)
 
         db.commit()
+        print(f"Saved {len(clauses_data)} clauses for contract {contract.id}")
     except Exception as e:
+        print(f"Analysis error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         contract.status = "failed"
         db.commit()
-        print(f"Analysis error: {e}")
-        # Still return the contract ID so user can see it
 
     return {"contract_id": contract.id, "redirect": f"/analysis?id={contract.id}"}
 
@@ -289,6 +296,7 @@ async def get_analysis(
         raise HTTPException(status_code=404, detail="Contract not found")
 
     clauses = db.query(Clause).filter(Clause.contract_id == contract_id).all()
+    print(f"Returning {len(clauses)} clauses for contract {contract_id}")
 
     return {
         "risk_score": contract.risk_score or 0,
