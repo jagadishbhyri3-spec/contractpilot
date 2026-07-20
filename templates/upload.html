@@ -1,5 +1,102 @@
 {% extends "base.html" %}
 {% block title %}Analyze Contract — ContractPilot{% endblock %}
+
+{% block extra_css %}
+<style>
+.upload-page {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+.upload-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 2.5rem;
+}
+.upload-card h1 {
+    color: #f1f5f9;
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+}
+.upload-card > p {
+    color: #64748b;
+    margin-bottom: 2rem;
+}
+.file-dropzone {
+    border: 2px dashed #334155;
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: #0f172a;
+    transition: all 0.2s;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+}
+.file-dropzone:hover,
+.file-dropzone.dragover {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.05);
+}
+.file-dropzone svg {
+    color: #64748b;
+    margin-bottom: 1rem;
+}
+.file-dropzone p {
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+}
+.file-dropzone .file-hint {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+.file-dropzone input[type="file"] {
+    display: none;
+}
+.text-link {
+    color: #6366f1;
+    text-decoration: underline;
+}
+.file-name {
+    color: #22c55e;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    display: none;
+}
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+.alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.alert-success {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+#submitBtn {
+    margin-top: 0.5rem;
+    width: 100%;
+    background: #6366f1;
+    color: white;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+#submitBtn:hover {
+    background: #4f46e5;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="upload-page">
     <div class="upload-card">
@@ -39,7 +136,7 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
+{% block extra_js %}
 <script>
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
@@ -62,7 +159,7 @@ fileInput.addEventListener('change', () => {
 });
 
 function showFileName(name) {
-    fileName.textContent = `Selected: ${name}`;
+    fileName.textContent = 'Selected: ' + name;
     fileName.style.display = 'block';
 }
 
@@ -83,7 +180,7 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
     try {
         const res = await fetch('/api/contracts/analyze', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: { 'Authorization': 'Bearer ' + token },
             body: formData
         });
         const result = await res.json();
