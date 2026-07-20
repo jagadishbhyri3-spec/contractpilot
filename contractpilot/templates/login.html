@@ -1,5 +1,7 @@
 {% extends "base.html" %}
+
 {% block title %}Log In — ContractPilot{% endblock %}
+
 {% block content %}
 <div class="auth-container">
     <div class="auth-card">
@@ -14,15 +16,15 @@
                 <label>Password</label>
                 <input type="password" name="password" required placeholder="••••••••">
             </div>
-            <button type="submit" class="btn-primary btn-full">Log In</button>
+            <button type="submit" class="btn btn-primary btn-full">Log In</button>
         </form>
         <p class="auth-footer">Don't have an account? <a href="/register">Sign up free</a></p>
-        <div id="loginError" class="alert alert-error" style="display:none"></div>
+        <div id="loginError" class="auth-error" style="display:none"></div>
     </div>
 </div>
 {% endblock %}
 
-{% block scripts %}
+{% block extra_js %}
 <script>
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
