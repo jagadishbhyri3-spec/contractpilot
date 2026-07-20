@@ -1132,3 +1132,12 @@ body.has-sidebar .site-footer {
         width: 100%;
     }
 }
+
+/* Fix sidebar arrow icon */
+.sidebar-footer::before,
+.sidebar-footer::after,
+.sidebar::after,
+.sidebar-nav::after {
+    display: none !important;
+    content: none !important;
+}
